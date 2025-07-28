@@ -1,0 +1,59 @@
+/* Responsive form styles */
+@media (max-width: 767px) {
+  /* General form styling */
+  .responsive-form .bg-gray-50 {
+    padding: 0.75rem !important;
+  }
+  
+  /* Make all grid layouts single column on mobile */
+  .responsive-form .grid {
+    grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+  }
+  
+  /* Smaller text for labels */
+  .responsive-form label {
+    font-size: 0.75rem !important;
+  }
+  
+  /* Smaller inputs and more compact */
+  .responsive-form input,
+  .responsive-form select {
+    padding: 0.25rem 0.5rem !important;
+    font-size: 0.75rem !important;
+  }
+  
+  /* Adjust spacing between form sections */
+  .responsive-form .space-y-4 > :not([hidden]) ~ :not([hidden]),
+  .responsive-form .space-y-6 > :not([hidden]) ~ :not([hidden]) {
+    --tw-space-y-reverse: 0;
+    margin-top: calc(0.75rem * calc(1 - var(--tw-space-y-reverse)));
+    margin-bottom: calc(0.75rem * var(--tw-space-y-reverse));
+  }
+  
+  /* Make form buttons stack on mobile */
+  .responsive-form .flex.justify-end {
+    flex-direction: column;
+  }
+  
+  .responsive-form .flex.justify-end > * {
+    margin-top: 0.5rem;
+    width: 100%;
+  }
+  
+  .responsive-form .flex.justify-end > *:first-child {
+    margin-top: 0;
+  }
+}
+
+/* Tablet styles */
+@media (min-width: 768px) and (max-width: 1023px) {
+  /* Two column layout for tablets */
+  .responsive-form .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+/* Desktop styles */
+@media (min-width: 1024px) {
+  /* Keep default desktop styles */
+}
