@@ -298,7 +298,8 @@ const PrescriptionForm: React.FC<PrescriptionFormProps> = ({
   // Fetch dropdown options on component mount
   useEffect(() => {
     fetchDropdownOptions()
-  }, [])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])  // We're using an empty dependency array as we only want to fetch options once on mount
   // Handle form input changes
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>

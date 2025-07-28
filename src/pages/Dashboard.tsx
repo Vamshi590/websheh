@@ -2,12 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../SupabaseConfig'
 import { useNavigate } from 'react-router-dom'
-interface User {
-  id: string
-  username: string
-  name: string
-  role: string
-}
+// User interface removed as it's no longer needed
 
 interface Patient {
   id: string
@@ -20,19 +15,11 @@ interface Patient {
 }
 
 const Dashboard: React.FC = () => {
-  const [user, setUser] = useState<User | null>(null)
   const [recentPatients, setRecentPatients] = useState<Patient[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const navigate = useNavigate()
 
   useEffect(() => {
-    // Get user from localStorage
-    const storedUser = localStorage.getItem('currentUser')
-    if (storedUser) {
-      setUser(JSON.parse(storedUser))
-      console.log(user)
-    }
-
     // Fetch recent patients
     fetchRecentPatients()
   }, [])
