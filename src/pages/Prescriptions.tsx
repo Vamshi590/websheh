@@ -153,6 +153,7 @@ const Prescriptions: React.FC = () => {
         .from('prescriptions')
         .select('*')
         .eq('DATE', today)
+        .order('CREATED AT', { ascending: false })
       
       if (error) {
         throw error
@@ -855,7 +856,7 @@ const Prescriptions: React.FC = () => {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-2 md:px-6 py-8 lg:px-10">
+      <main className="max-w-7xl mx-auto md:px-6 py-8 lg:px-10">
         {error && (
           <div className="mb-6 p-4 bg-red-50 border border-red-100 text-red-700 rounded-lg flex items-center">
             <svg

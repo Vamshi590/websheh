@@ -385,7 +385,7 @@ const PrescriptionForm: React.FC<PrescriptionFormProps> = ({
       <p className="text-sm text-gray-500 mb-4">Fields marked with * are required</p>
 
       {/* Vital Signs Section */}
-      <div className="bg-gray-50 p-4 rounded-md">
+      <div className="bg-gray-50 md:px-4 pt-5 pb-4 rounded-md">
         <h3 className="text-lg font-medium text-gray-900 mb-4">Vital Signs</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {/* TEMPARATURE */}
@@ -439,7 +439,7 @@ const PrescriptionForm: React.FC<PrescriptionFormProps> = ({
       </div>
 
       {/* Patient Complaint Section */}
-      <div className="bg-gray-50 p-4 rounded-md">
+      <div className="bg-gray-50 md:px-4 pt-5 pb-4 rounded-md">
         <h3 className="text-lg font-medium text-gray-900 mb-4">Patient Information</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Present Complain */}
@@ -517,7 +517,7 @@ const PrescriptionForm: React.FC<PrescriptionFormProps> = ({
       </div>
 
       {/* Prescription Section */}
-      <div className="bg-gray-50 p-4 rounded-md">
+      <div className="bg-gray-50 md:px-4 pt-5 pb-4 rounded-md">
         <h3 className="text-lg font-medium text-gray-900 mb-4">Prescription Details</h3>
 
         {/* Dynamic Prescription Fields */}
@@ -629,7 +629,7 @@ const PrescriptionForm: React.FC<PrescriptionFormProps> = ({
       </div>
 
       {/* Advice Section */}
-      <div className="bg-gray-50 p-4 rounded-md">
+      <div className="bg-gray-50 md:px-4 pt-5 pb-4 rounded-md">
         <h3 className="text-lg font-medium text-gray-900 mb-4">Doctor&apos;s Advice</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {Array.from({ length: visibleAdvice }).map((_, index) => (
@@ -695,7 +695,7 @@ const PrescriptionForm: React.FC<PrescriptionFormProps> = ({
       </div>
 
       {/* Additional Notes Section */}
-      <div className="bg-gray-50 p-4 rounded-md">
+      <div className="bg-gray-50 md:px-4 pt-5 pb-4 rounded-md">
         <h3 className="text-lg font-medium text-gray-900 mb-4">Additional Notes</h3>
         <div className="grid grid-cols-2 gap-4">
           {/* NOTES */}

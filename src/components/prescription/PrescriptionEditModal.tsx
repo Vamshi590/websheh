@@ -87,14 +87,14 @@ const PrescriptionEditModal: React.FC<PrescriptionEditModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex items-center backdrop-blur-sm justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+      <div className="flex items-center backdrop-blur-sm justify-center min-h-screen pt-4 pb-20 text-center sm:block sm:p-0">
         <div
           className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-6xl sm:w-full"
           role="dialog"
           aria-modal="true"
           aria-labelledby="modal-headline"
         >
-          <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+          <div className="bg-white md:px-4 pt-5 pb-4 sm:pb-4">
             <div className="sm:flex sm:items-start">
               <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
                 <h3 className="text-lg leading-6 font-medium text-gray-900" id="modal-headline">
@@ -103,7 +103,7 @@ const PrescriptionEditModal: React.FC<PrescriptionEditModalProps> = ({
 
                 {/* Tabs for switching between forms */}
                 <div className="border-b border-gray-200 mt-4 overflow-x-auto ">
-                  <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+                  <nav className="md:px-4 pt-5 pb-4 flex space-x-8" aria-label="Tabs">
                     <button
                       onClick={() => setActiveTab('prescription')}
                       className={`${

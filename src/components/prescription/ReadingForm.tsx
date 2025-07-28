@@ -474,7 +474,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
       <h2 className="text-xl font-medium">Eye Reading Form</h2>
 
       {/* Section 2: Auto Refractometer (AR) */}
-      <div className="bg-gray-50 p-3 rounded-md">
+      <div className="bg-gray-50 md:px-4 pt-5 pb-4 rounded-md">
         <h3 className="text-md font-medium mb-2 flex items-center">Auto Refractometer (AR)</h3>
 
         {/* Right Eye */}
@@ -611,7 +611,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
         </div>
       </div>
       {/* Section 1: Glasses Reading (GR) */}
-      <div className="bg-gray-50 p-3 rounded-md">
+      <div className="bg-gray-50 md:px-4 pt-5 pb-4 rounded-md">
         <h3 className="text-md font-medium mb-2 flex items-center">Glasses Reading (GR)</h3>
 
         {/* Right Eye - Distance */}
@@ -820,7 +820,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
       </div>
 
       {/* Section 3: Power Glass Prescription (PGP) */}
-      <div className="bg-gray-50 p-3 rounded-md">
+      <div className="bg-gray-50 md:px-4 pt-5 pb-4 rounded-md">
         <h3 className="text-md font-medium mb-2 flex items-center">
           Previous Glass Prescription (PGP)
         </h3>
@@ -1031,7 +1031,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
       </div>
 
       {/* Section 4: Subjective Refraction (SR) */}
-      <div className="bg-gray-50 p-3 rounded-md">
+      <div className="bg-gray-50 md:px-4 pt-5 pb-4 rounded-md">
         <h3 className="text-md font-medium mb-2 flex items-center">Subjective Refraction</h3>
 
         {/* Right Eye - Distance */}
@@ -1240,7 +1240,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
       </div>
 
       {/* Section 5: Clinical Findings (CF) */}
-      <div className="bg-gray-50 p-3 rounded-md">
+      <div className="bg-gray-50 md:px-4 pt-5 pb-4 rounded-md">
         <h3 className="text-md font-medium mb-2 flex items-center">Clinical Findings (CF)</h3>
 
         {/* Right Eye Clinical Findings */}
