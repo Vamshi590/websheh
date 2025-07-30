@@ -187,7 +187,6 @@ const CombinedForm = ({
     selectedPatient,
     initialData
 }: ReadingFormProps): JSX.Element => {
-    console.log(selectedPatient)
     // State to control the visibility of the Eye Reading Form section
     const [showEyeReadingForm, setShowEyeReadingForm] = useState<boolean>(true);
     // State for managing visible prescription and advice fields
@@ -440,25 +439,56 @@ const CombinedForm = ({
         }))
     }
 
+    // Helper function to compare initial data with current form data
+    const hasFieldChanged = (key: string, currentValue: unknown): boolean => {
+        if (!initialData) return true; // If no initial data, consider everything changed
+        
+        // Handle special case for numeric values
+        if (typeof currentValue === 'number' && typeof initialData[key] === 'string') {
+            return currentValue.toString() !== initialData[key];
+        }
+        
+        // Handle special case for string values
+        if (typeof currentValue === 'string' && typeof initialData[key] === 'number') {
+            return currentValue !== initialData[key].toString();
+        }
+        
+        // Regular comparison
+        return JSON.stringify(currentValue) !== JSON.stringify(initialData[key]);
+    };
+    
     // Handle form submission
     const handleSubmit = async (e: React.FormEvent): Promise<void> => {
         e.preventDefault()
 
-        // Prepare the final form data with both eye reading and prescription data
-        const finalFormData = {
-            ...formData,
-            // Include only the visible prescription fields
-            ...Object.fromEntries(
-                Object.entries(formData)
-                    .filter(([key]) =>
-                        (key.startsWith('PRESCRIPTION') && parseInt(key.split(' ')[1]) <= visiblePrescription) ||
-                        (key.startsWith('ADVICE') && parseInt(key.split(' ')[1]) <= visibleAdvice) ||
-                        !key.startsWith('PRESCRIPTION') && !key.startsWith('ADVICE')
-                    )
-            )
+        // Filter entries to include only visible prescription/advice fields
+        const visibleEntries = Object.entries(formData).filter(([key]) =>
+            (key.startsWith('PRESCRIPTION') && parseInt(key.split(' ')[1]) <= visiblePrescription) ||
+            (key.startsWith('ADVICE') && parseInt(key.split(' ')[1]) <= visibleAdvice) ||
+            !key.startsWith('PRESCRIPTION') && !key.startsWith('ADVICE')
+        );
+        
+        // Create an object with only the changed fields
+        const changedFields: Record<string, unknown> = {};
+        
+        // Always include the ID if it exists in initialData
+        if (initialData && initialData.id) {
+            changedFields.id = initialData.id;
         }
-
-        await onSubmit(finalFormData)
+        
+        // Always include patient ID
+        changedFields.patientId = formData.patientId;
+        
+        // Add only the fields that have changed
+        visibleEntries.forEach(([key, value]) => {
+            if (hasFieldChanged(key, value)) {
+                changedFields[key] = value;
+            }
+        });
+        
+        console.log('Submitting only changed fields:', changedFields);
+        
+        await onSubmit(changedFields as ReadingFormData);
     }
 
     // Dynamic dropdown options state
@@ -500,15 +530,6 @@ const CombinedForm = ({
             previousHistoryResult.data?.map((item: DropdownOption) => item.option_value) || []
           const othersOptions = othersResult.error ? [] : 
             othersResult.data?.map((item: DropdownOption) => item.option_value) || []
-          
-          console.log(
-            'Present options:',
-            presentOptions,
-            'Previous options:',
-            previousOptions,
-            'Others options:',
-            othersOptions
-          )
     
           // Set state with unique values
           setDynamicPresentComplainOptions([...new Set(presentOptions as string[])])
@@ -599,8 +620,8 @@ const CombinedForm = ({
     return (
         <form className="space-y-4" onSubmit={handleSubmit}>
             {/* Eye Reading Form with toggle button */}
-            <div onClick={() => setShowEyeReadingForm(!showEyeReadingForm)} className={`sticky top-0 bg-white z-10 py-2 flex justify-between cursor-pointer items-center ${showEyeReadingForm ? '' : 'border border-gray-500 shadow-md rounded-md '}`}>
-                <h2 className="text-xl font-medium px-2">Eye Reading Form</h2>
+            <div onClick={() => setShowEyeReadingForm(!showEyeReadingForm)} className={`sticky top-0 bg-white z-10 py-1 flex justify-between cursor-pointer items-center ${showEyeReadingForm ? '' : 'border border-gray-500 shadow-md rounded-md '}`}>
+                <h2 className="text-lg font-medium px-4 py-1">Eye Reading Form</h2>
                 <button
                     type="button"
                     className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-black"
@@ -1823,7 +1844,7 @@ const CombinedForm = ({
                 </div>)}
             {/* Prescription Section */}
             <div className="mt-8 bg-white shadow rounded-lg p-1">
-                <h2 className="text-xl font-semibold text-gray-800 mb-6 sticky top-0 bg-white z-10 py-2 flex justify-between items-center">Prescription Form</h2>
+                <h2 className="text-lg font-semibold text-gray-800 px-4 mb-6 sticky top-0 bg-white z-10 py-2 flex justify-between items-center">Prescription Form</h2>
 
                 {/* Vital Signs Section */}
                 <div className="bg-gray-50 p-4 rounded-md border border-gray-300">

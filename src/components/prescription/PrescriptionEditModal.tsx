@@ -62,19 +62,19 @@ const PrescriptionEditModal: React.FC<PrescriptionEditModalProps> = ({
   const patient = convertToReceiptFormPatient(prescription)
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex items-center backdrop-blur-sm justify-center min-h-screen pt-4 pb-20 text-center sm:block sm:p-0">
+    <div className="fixed inset-0 z-50 overflow-y-auto sm:border sm:rounded-lg sm:border-gray-500">
+      <div className="flex items-center backdrop-blur-sm justify-center min-h-screen md:pb-20 text-center sm:block sm:p-0">
         <div
-          className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-6xl sm:w-full"
+          className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all md:my-8 sm:align-middle sm:max-w-6xl sm:w-full"
           role="dialog"
           aria-modal="true"
           aria-labelledby="modal-headline"
         >
-          <div className="bg-white md:px-4 pt-5 pb-4 sm:pb-4">
+          <div className="bg-white md:px-4 md:pt-5 md:pb-4">
             <div className="sm:flex sm:items-start">
               <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
 
-              <div className="flex justify-between items-center border-b border-gray-200 pb-2">
+              <div className="flex justify-between items-center border-b border-gray-200 pb-2 px-4">
                   {/* Tabs for switching between forms */}
                   <div className="border-b border-gray-200">
                     <nav className="-mb-px flex space-x-8" aria-label="Tabs">

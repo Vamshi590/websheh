@@ -173,6 +173,79 @@ const Prescriptions: React.FC = () => {
     }
   }
 
+  // We're using direct field comparison in update functions instead of a merge helper
+
+  // Function to handle updating a prescription with concurrency control
+  const handleUpdatePrescription = async (prescription: Prescription): Promise<void> => {
+    try {
+      setLoading(true);
+      const id = prescription.id;
+      
+      // First, fetch the latest version of the prescription from the database
+      const { data: latestData, error: fetchError } = await supabase
+        .from('prescriptions')
+        .select('*')
+        .eq('id', id)
+        .single();
+      
+      if (fetchError) {
+        throw fetchError;
+      }
+      
+      if (!latestData) {
+        throw new Error('Prescription not found');
+      }
+      
+      // Extract only the fields that have changed
+      const changedFields: Record<string, unknown> = {};
+      
+      // Add only the fields that have changed
+      Object.entries(prescription).forEach(([key, value]) => {
+        // Skip id field as we don't want to change that
+        if (key === 'id') return;
+        
+        // If the field has been modified, add it to changedFields
+        if (JSON.stringify(value) !== JSON.stringify(latestData[key])) {
+          changedFields[key] = value;
+        }
+      });
+      
+      // Add update metadata
+      changedFields['UPDATED BY'] = getCurrentUser();
+      changedFields['UPDATED AT'] = new Date().toISOString();
+      
+      console.log('Updating only changed fields:', changedFields);
+      
+      // Update only the changed fields in Supabase
+      const { data, error } = await supabase
+        .from('prescriptions')
+        .update(changedFields)
+        .eq('id', id)
+        .select()
+        .single();
+      
+      if (error) {
+        throw error;
+      }
+      
+      if (data) {
+        setPrescriptions(prescriptions.map((p) => (p.id === id ? data as Prescription : p)));
+        setIsModalOpen(false);
+        setEditingPrescription(null);
+        setShowAddForm(false);
+        setError('');
+        // Show success toast
+        toast.success('Prescription updated successfully');
+      }
+    } catch (err) {
+      console.error('Error updating prescription:', err);
+      setError('Failed to update prescription');
+      toast.error('Failed to update prescription. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  }
+
   // Function to handle adding a new prescription
   const handleAddPrescription = async (formData: Omit<Prescription, 'id'>): Promise<void> => {
     try {
@@ -655,88 +728,139 @@ const Prescriptions: React.FC = () => {
     }
   }
 
-  // Function to handle updating a prescription
-  const handleUpdatePrescription = async (prescription: Prescription): Promise<void> => {
-    try {
-      setLoading(true)
-      const id = prescription.id
-      prescription = {
-        ...prescription,
-        'UPDATED BY': getCurrentUser(),
-        'UPDATED AT': new Date().toISOString()
-      }
+  // Function to handle updating a prescription with concurrency control
+  // const handleUpdatePrescription = async (prescription: Prescription): Promise<void> => {
+  //   try {
+  //     setLoading(true);
+  //     const id = prescription.id;
       
-      // Update the prescription in Supabase
-      const { data, error } = await supabase
-        .from('prescriptions')
-        .update(prescription)
-        .eq('id', id)
-        .select()
-        .single()
+  //     // First, fetch the latest version of the prescription from the database
+  //     const { data: latestData, error: fetchError } = await supabase
+  //       .from('prescriptions')
+  //       .select('*')
+  //       .eq('id', id)
+  //       .single();
       
-      if (error) {
-        throw error
-      }
+  //     if (fetchError) {
+  //       throw fetchError;
+  //     }
       
-      if (data) {
-        setPrescriptions(prescriptions.map((p) => (p.id === id ? data as Prescription : p)))
-        setIsModalOpen(false)
-        setEditingPrescription(null)
-        setShowAddForm(false)
-        setError('')
-        // Show success toast
-        toast.success('Prescription updated successfully')
-      }
-    } catch (err) {
-      console.error('Error updating prescription:', err)
-      setError('Failed to update prescription')
-    } finally {
-      setLoading(false)
-    }
-  }
+  //     if (!latestData) {
+  //       throw new Error('Prescription not found');
+  //     }
+      
+  //     // Previously used merge approach, now using direct field comparison
+      
+  //     // Add update metadata
+  //     const updatedPrescription = {
+  //       ...mergedPrescription,
+  //       'UPDATED BY': getCurrentUser(),
+  //       'UPDATED AT': new Date().toISOString()
+  //     };
+      
+  //     // Update the prescription in Supabase
+  //     const { data, error } = await supabase
+  //       .from('prescriptions')
+  //       .update(updatedPrescription)
+  //       .eq('id', id)
+  //       .select()
+  //       .single();
+      
+  //     if (error) {
+  //       throw error;
+  //     }
+      
+  //     if (data) {
+  //       setPrescriptions(prescriptions.map((p) => (p.id === id ? data as Prescription : p)));
+  //       setIsModalOpen(false);
+  //       setEditingPrescription(null);
+  //       setShowAddForm(false);
+  //       setError('');
+  //       // Show success toast
+  //       toast.success('Prescription updated successfully');
+  //     }
+  //   } catch (err) {
+  //     console.error('Error updating prescription:', err);
+  //     setError('Failed to update prescription');
+  //     toast.error('Failed to update prescription. Please try again.');
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // }
 
-  // Function to handle updating an eye reading
+  // Function to handle updating an eye reading with concurrency control
   const handleUpdateEyeReading = async (eyeReading: Prescription): Promise<void> => {
     try {
-      setLoading(true)
-      const id = eyeReading.id
-      eyeReading = {
-        ...eyeReading,
-        'UPDATED BY': getCurrentUser(),
-        'UPDATED AT': new Date().toISOString()
+      setLoading(true);
+      const id = eyeReading.id;
+      
+      // First, fetch the latest version of the eye reading from the database
+      const { data: latestData, error: fetchError } = await supabase
+        .from('prescriptions')
+        .select('*')
+        .eq('id', id)
+        .single();
+      
+      if (fetchError) {
+        throw fetchError;
       }
       
-      // Update the eye reading in Supabase
+      if (!latestData) {
+        throw new Error('Eye reading not found');
+      }
+      
+      // Extract only the fields that have changed
+      const changedFields: Record<string, unknown> = {};
+      
+      // Add only the fields that have changed
+      Object.entries(eyeReading).forEach(([key, value]) => {
+        // Skip id field as we don't want to change that
+        if (key === 'id') return;
+        
+        // If the field has been modified, add it to changedFields
+        if (JSON.stringify(value) !== JSON.stringify(latestData[key])) {
+          changedFields[key] = value;
+        }
+      });
+      
+      // Add update metadata
+      changedFields['UPDATED BY'] = getCurrentUser();
+      changedFields['UPDATED AT'] = new Date().toISOString();
+      
+      console.log('Updating only changed eye reading fields:', changedFields);
+      
+      // Update only the changed fields in Supabase
       const { data, error } = await supabase
         .from('prescriptions')
-        .update(eyeReading)
+        .update(changedFields)
         .eq('id', id)
         .select()
-        .single()
+        .single();
       
       if (error) {
-        throw error
+        throw error;
       }
       
       if (data) {
-        const updatedEyeReading = data as Prescription
-        setPrescriptions(prescriptions.map((p) => (p.id === id ? updatedEyeReading : p)))
+        const updatedEyeReading = data as Prescription;
+        setPrescriptions(prescriptions.map((p) => (p.id === id ? updatedEyeReading : p)));
 
         // If this is the current receipt, update it
         if (currentReceipt && currentReceipt.id === id) {
-          setCurrentReceipt(updatedEyeReading)
+          setCurrentReceipt(updatedEyeReading);
         }
-        setIsEyeReadingModalOpen(false)
-        setEditingEyeReading(null)
-        setError('')
+        setIsEyeReadingModalOpen(false);
+        setEditingEyeReading(null);
+        setError('');
         // Show success toast
-        toast.success('Eye reading updated successfully')
+        toast.success('Eye reading updated successfully');
       }
     } catch (err) {
-      console.error('Error updating eye reading:', err)
-      setError('Failed to update eye reading')
+      console.error('Error updating eye reading:', err);
+      setError('Failed to update eye reading');
+      toast.error('Failed to update eye reading. Please try again.');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
@@ -830,8 +954,8 @@ const Prescriptions: React.FC = () => {
       <header className="bg-white shadow-sm sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-6 py-4 sm:px-8 lg:px-10 flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-medium text-gray-800">Receipts & Prescriptions</h1>
-            <p className="text-sm text-gray-500">Sri Harshini Eye Hospital</p>
+            <h1 className="text-2xl font-medium text-gray-800">Prescriptions</h1>
+            <p className="text-sm text-gray-500">Sri Harsha Eye Hospital</p>
           </div>
           <div className="flex items-center space-x-3">
             <button
@@ -856,7 +980,7 @@ const Prescriptions: React.FC = () => {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto md:px-6 py-8 lg:px-10">
+      <main className="max-w-7xl mx-auto md:px-6 lg:pt-2 lg:pb-8 lg:px-10">
         {error && (
           <div className="mb-6 p-4 bg-red-50 border border-red-100 text-red-700 rounded-lg flex items-center">
             <svg
@@ -923,7 +1047,7 @@ const Prescriptions: React.FC = () => {
         )}
 
         {/* Search Bar */}
-        <div className="mb-6 bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+        <div className="my-2 bg-white p-4 rounded-lg shadow-sm border border-gray-100">
           <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-2">
             Search Patients
           </label>
