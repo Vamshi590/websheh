@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react'
-import PrescriptionForm from './PrescriptionForm'
-import ReceiptForm, { type Patient as ReceiptFormPatient } from './ReceiptForm'
-import ReadingForm from './ReadingForm'
+import React, { useState } from 'react'
+import { type Patient as ReceiptFormPatient } from './ReceiptForm'
+import CombinedForm from './CombinedForm'
 
 // Define the Prescription type to match with other components
 type Prescription = {
@@ -22,34 +21,11 @@ const PrescriptionEditModal: React.FC<PrescriptionEditModalProps> = ({
   onClose,
   onSave,
   prescription,
-  prescriptionCount
 }) => {
   const [activeTab, setActiveTab] = useState<'prescription' | 'receipt' | 'readings'>(
     'prescription'
   )
 
-  // Create receipt data from prescription data
-  const [receiptData, setReceiptData] = useState<Record<string, unknown>>({})
-
-  useEffect(() => {
-    if (prescription) {
-      // Initialize receipt data with prescription data
-      setReceiptData({
-        // Keep all original prescription data
-        ...prescription,
-        // Ensure these specific receipt fields are included
-        'RECEIPT NO': prescription['RECEIPT NO'] || '',
-        'PAID FOR': prescription['PAID FOR'] || '',
-        MODE: prescription['MODE'] || 'Cash',
-        'TOTAL AMOUNT': prescription['TOTAL AMOUNT'] || '',
-        'ADVANCE PAID': prescription['ADVANCE PAID'] || '0',
-        'AMOUNT RECEIVED': prescription['AMOUNT RECEIVED'] || '',
-        'DISCOUNT PERCENTAG': prescription['DISCOUNT PERCENTAG'] || '0',
-        'DISCOUNT AMOUNT': prescription['DISCOUNT AMOUNT'] || '0',
-        'AMOUNT DUE': prescription['AMOUNT DUE'] || ''
-      })
-    }
-  }, [prescription])
 
   if (!isOpen || !prescription) return null
 
@@ -97,75 +73,50 @@ const PrescriptionEditModal: React.FC<PrescriptionEditModalProps> = ({
           <div className="bg-white md:px-4 pt-5 pb-4 sm:pb-4">
             <div className="sm:flex sm:items-start">
               <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
-                <h3 className="text-lg leading-6 font-medium text-gray-900" id="modal-headline">
-                  Edit Patient Record
-                </h3>
 
-                {/* Tabs for switching between forms */}
-                <div className="border-b border-gray-200 mt-4 overflow-x-auto ">
-                  <nav className="md:px-4 pt-5 pb-4 flex space-x-8" aria-label="Tabs">
+              <div className="flex justify-between items-center border-b border-gray-200 pb-2">
+                  {/* Tabs for switching between forms */}
+                  <div className="border-b border-gray-200">
+                    <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+                      <button
+                        onClick={() => setActiveTab('prescription')}
+                        className={`${
+                          activeTab === 'prescription'
+                            ? 'border-blue-500 text-blue-600'
+                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                        } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+                      >
+                        Prescription Form
+                      </button>
+                    </nav>
+                  </div>
+
+                  {/* Save button aligned to the right */}
+                  {activeTab === 'prescription' && (
                     <button
-                      onClick={() => setActiveTab('prescription')}
-                      className={`${
-                        activeTab === 'prescription'
-                          ? 'border-blue-500 text-blue-600'
-                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                      } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+                      type="button"
+                      onClick={() => {
+                        // Trigger form submission via ref or other method
+                        document
+                          .querySelector('form')
+                          ?.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }))
+                      }}
+                      className="ml-3 inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:text-sm"
                     >
-                      Prescription Form
+                      Save
                     </button>
-                    <button
-                      onClick={() => setActiveTab('receipt')}
-                      className={`${
-                        activeTab === 'receipt'
-                          ? 'border-blue-500 text-blue-600'
-                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                      } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
-                    >
-                      Cash Receipt Form
-                    </button>
-                    <button
-                      onClick={() => setActiveTab('readings')}
-                      className={`${
-                        activeTab === 'readings'
-                          ? 'border-blue-500 text-blue-600'
-                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                      } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
-                    >
-                      Eye Readings Form
-                    </button>
-                  </nav>
+                  )}
                 </div>
 
                 <div className="mt-4 max-h-[70vh] overflow-y-auto">
                   {/* Prescription Form Tab */}
                   {activeTab === 'prescription' && (
-                    <PrescriptionForm
+                    <CombinedForm
                       onSubmit={handleSubmit}
                       onCancel={onClose}
                       initialData={prescription}
-                      prescriptionCount={prescriptionCount}
-                    />
-                  )}
-
-                  {/* Cash Receipt Form Tab */}
-                  {activeTab === 'receipt' && (
-                    <ReceiptForm
-                      onSubmit={handleSubmit}
-                      onCancel={onClose}
                       selectedPatient={patient}
                       patients={[patient]}
-                      initialData={receiptData}
-                    />
-                  )}
-
-                  {/* Eye Readings Form Tab */}
-                  {activeTab === 'readings' && (
-                    <ReadingForm
-                      onSubmit={handleSubmit}
-                      onCancel={onClose}
-                      selectedPatient={patient}
-                      initialData={prescription}
                     />
                   )}
                 </div>
