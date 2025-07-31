@@ -866,7 +866,7 @@ const Prescriptions: React.FC = () => {
 
   // Function to find receipts for a patient
   const findReceiptsForPatient = (patientId: string): Prescription[] => {
-    return prescriptions.filter((p) => p.patientId === patientId && p.TYPE === 'RECEIPT')
+    return prescriptions.filter((p) => p['PATIENT ID'] === patientId && p.TYPE === 'RECEIPT')
   }
 
   // Function to handle patient search
@@ -1209,8 +1209,10 @@ const Prescriptions: React.FC = () => {
                   {/* Check for existing receipts */}
                   {(() => {
                     // Make sure we have a valid patient ID
-                    const patientId = typeof foundPatient.id === 'string' ? foundPatient.id : ''
+                    const patientId = typeof foundPatient['patientId'] === 'string' ? foundPatient['patientId'] : ''
+                    console.log('Patient ID:', patientId)
                     const patientReceipts = findReceiptsForPatient(patientId)
+                    console.log('Patient receipts:', patientReceipts)
 
                     if (patientReceipts.length > 0) {
                       return (

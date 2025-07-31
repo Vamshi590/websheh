@@ -229,9 +229,9 @@ const CombinedForm = ({
         'PREVIOUS HISTORY': (initialData?.['PREVIOUS HISTORY'] as string) || '',
         OTHERS: (initialData?.['OTHERS'] as string) || '',
         OTHERS1: (initialData?.['OTHERS1'] as string) || '',
-        TEMPARATURE : (initialData?.['TEMPARATURE'] as string) || '',
-        'P.R.' : (initialData?.['P.R.'] as string) || '',
-        'SPO2' : (initialData?.['SPO2'] as string) || '',
+        TEMPARATURE: (initialData?.['TEMPARATURE'] as string) || '',
+        'P.R.': (initialData?.['P.R.'] as string) || '',
+        'SPO2': (initialData?.['SPO2'] as string) || '',
         // Prescription fields
         'PRESCRIPTION 1': (initialData?.['PRESCRIPTION 1'] as string) || '',
         'DAYS 1': (initialData?.['DAYS 1'] as string) || '',
@@ -428,35 +428,167 @@ const CombinedForm = ({
         }
     }
 
-    // Handle EditableCombobox changes
+    // Store medicine combinations for autofill (medicine name, days, timing)
+    const [medicineCombinations, setMedicineCombinations] = useState<Record<string, { days: string, timing: string }>>({});
+
+    // Load saved medicine combinations from localStorage
+    useEffect(() => {
+        const savedCombinations = localStorage.getItem('medicineCombinations');
+        if (savedCombinations) {
+            try {
+                setMedicineCombinations(JSON.parse(savedCombinations));
+                console.log('Loaded medicine combinations:', JSON.parse(savedCombinations));
+            } catch (error) {
+                console.error('Error loading saved medicine combinations:', error);
+            }
+        }
+    }, []);
+
+
+    // Track the last changed field and its value for medicine combinations
+    const [lastChanged, setLastChanged] = useState<{
+        prescriptionNum: string;
+        field: 'medicine' | 'days' | 'timing';
+        value: string;
+    } | null>(null);
+
+    // Effect to update medicine combinations when form data changes
+    useEffect(() => {
+        // Only run if we have a last changed field
+        if (!lastChanged) return;
+
+        const { prescriptionNum } = lastChanged;
+        const medicineField = `PRESCRIPTION ${prescriptionNum}`;
+        const daysField = `DAYS ${prescriptionNum}`;
+        const timingField = `TIMING ${prescriptionNum}`;
+
+        // Get current values from form data
+        const medicine = formData[medicineField] as string;
+        const days = formData[daysField] as string;
+        const timing = formData[timingField] as string;
+
+        // Only save if all fields are filled
+        if (medicine && medicine.trim() !== '' &&
+            days && days.trim() !== '' &&
+            timing && timing.trim() !== '') {
+
+            // Create updated combinations - don't depend on current medicineCombinations state
+            // to avoid infinite loop
+            const savedCombinations = localStorage.getItem('medicineCombinations');
+            let currentCombinations = {};
+
+            try {
+                if (savedCombinations) {
+                    currentCombinations = JSON.parse(savedCombinations);
+                }
+            } catch (error) {
+                console.error('Error parsing saved combinations:', error);
+            }
+
+            const newCombinations = {
+                ...currentCombinations,
+                [medicine]: { days, timing }
+            };
+
+            // Save to localStorage first
+            try {
+                localStorage.setItem('medicineCombinations', JSON.stringify(newCombinations));
+                console.log('Saving updated combination for:', medicine, { days, timing });
+
+                // Then update state - but only if it's different to avoid loop
+                if (JSON.stringify(medicineCombinations[medicine]) !== JSON.stringify({ days, timing })) {
+                    setMedicineCombinations(newCombinations);
+                }
+            } catch (error) {
+                console.error('Error saving medicine combinations:', error);
+            }
+
+            // Clear the last changed field to prevent repeated updates
+            setLastChanged(null);
+        }
+    }, [formData, lastChanged]);  // Remove medicineCombinations from dependencies
+
+    // Handle EditableCombobox changes with autofill functionality
     const handleComboboxChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
     ): void => {
-        const { name, value } = e.target
-        setFormData((prevData) => ({
+        const { name, value } = e.target;
+
+        // Update the form data with the new value
+        setFormData(prevData => ({
             ...prevData,
             [name]: value
-        }))
-    }
+        }));
+
+        // Handle medicine field autofill
+        if (name.startsWith('PRESCRIPTION ')) {
+            const prescriptionNum = name.split(' ')[1];
+
+            // If we have saved data for this medicine, autofill related fields
+            if (medicineCombinations[value]) {
+                const savedDays = medicineCombinations[value].days;
+                const savedTiming = medicineCombinations[value].timing;
+
+                // Autofill the days and timing fields if they're empty
+                setFormData(prevData => {
+                    const currentDays = prevData[`DAYS ${prescriptionNum}`] as string;
+                    const currentTiming = prevData[`TIMING ${prescriptionNum}`] as string;
+
+                    return {
+                        ...prevData,
+                        [`DAYS ${prescriptionNum}`]: (!currentDays || currentDays === '') ? savedDays : currentDays,
+                        [`TIMING ${prescriptionNum}`]: (!currentTiming || currentTiming === '') ? savedTiming : currentTiming
+                    };
+                });
+            }
+
+            // Track this change for medicine combination updates
+            setLastChanged({
+                prescriptionNum,
+                field: 'medicine',
+                value
+            });
+        }
+
+        // Track days field changes
+        else if (name.startsWith('DAYS ')) {
+            const prescriptionNum = name.split(' ')[1];
+            setLastChanged({
+                prescriptionNum,
+                field: 'days',
+                value
+            });
+        }
+
+        // Track timing field changes
+        else if (name.startsWith('TIMING ')) {
+            const prescriptionNum = name.split(' ')[1];
+            setLastChanged({
+                prescriptionNum,
+                field: 'timing',
+                value
+            });
+        }
+    };
 
     // Helper function to compare initial data with current form data
     const hasFieldChanged = (key: string, currentValue: unknown): boolean => {
         if (!initialData) return true; // If no initial data, consider everything changed
-        
+
         // Handle special case for numeric values
         if (typeof currentValue === 'number' && typeof initialData[key] === 'string') {
             return currentValue.toString() !== initialData[key];
         }
-        
+
         // Handle special case for string values
         if (typeof currentValue === 'string' && typeof initialData[key] === 'number') {
             return currentValue !== initialData[key].toString();
         }
-        
+
         // Regular comparison
         return JSON.stringify(currentValue) !== JSON.stringify(initialData[key]);
     };
-    
+
     // Handle form submission
     const handleSubmit = async (e: React.FormEvent): Promise<void> => {
         e.preventDefault()
@@ -467,27 +599,27 @@ const CombinedForm = ({
             (key.startsWith('ADVICE') && parseInt(key.split(' ')[1]) <= visibleAdvice) ||
             !key.startsWith('PRESCRIPTION') && !key.startsWith('ADVICE')
         );
-        
+
         // Create an object with only the changed fields
         const changedFields: Record<string, unknown> = {};
-        
+
         // Always include the ID if it exists in initialData
         if (initialData && initialData.id) {
             changedFields.id = initialData.id;
         }
-        
+
         // Always include patient ID
         changedFields.patientId = formData.patientId;
-        
+
         // Add only the fields that have changed
         visibleEntries.forEach(([key, value]) => {
             if (hasFieldChanged(key, value)) {
                 changedFields[key] = value;
             }
         });
-        
+
         console.log('Submitting only changed fields:', changedFields);
-        
+
         await onSubmit(changedFields as ReadingFormData);
     }
 
@@ -501,115 +633,115 @@ const CombinedForm = ({
         option_value: string
     }
 
-      // Helper function to fetch dropdown options from Supabase
-      const fetchDropdownOptions = async (): Promise<void> => {
+    // Helper function to fetch dropdown options from Supabase
+    const fetchDropdownOptions = async (): Promise<void> => {
         try {
-          // Fetch all dropdown options in parallel
-          const [presentComplainResult, previousHistoryResult, othersResult] = await Promise.all([
-            supabase
-              .from('dropdown_options')
-              .select('option_value')
-              .eq('field_name', 'presentComplainOptions')
-              .order('option_value', { ascending: true }),
-            supabase
-              .from('dropdown_options')
-              .select('option_value')
-              .eq('field_name', 'previousHistoryOptions')
-              .order('option_value', { ascending: true }),
-            supabase
-              .from('dropdown_options')
-              .select('option_value')
-              .eq('field_name', 'othersOptions')
-              .order('option_value', { ascending: true })
-          ])
-          
-          // Extract values or use empty arrays if there's an error
-          const presentOptions = presentComplainResult.error ? [] : 
-            presentComplainResult.data?.map((item: DropdownOption) => item.option_value) || []
-          const previousOptions = previousHistoryResult.error ? [] : 
-            previousHistoryResult.data?.map((item: DropdownOption) => item.option_value) || []
-          const othersOptions = othersResult.error ? [] : 
-            othersResult.data?.map((item: DropdownOption) => item.option_value) || []
-    
-          // Set state with unique values
-          setDynamicPresentComplainOptions([...new Set(presentOptions as string[])])
-          setDynamicPreviousHistoryOptions([...new Set(previousOptions as string[])])
-          setDynamicOthersOptions([...new Set(othersOptions as string[])])
+            // Fetch all dropdown options in parallel
+            const [presentComplainResult, previousHistoryResult, othersResult] = await Promise.all([
+                supabase
+                    .from('dropdown_options')
+                    .select('option_value')
+                    .eq('field_name', 'presentComplainOptions')
+                    .order('option_value', { ascending: true }),
+                supabase
+                    .from('dropdown_options')
+                    .select('option_value')
+                    .eq('field_name', 'previousHistoryOptions')
+                    .order('option_value', { ascending: true }),
+                supabase
+                    .from('dropdown_options')
+                    .select('option_value')
+                    .eq('field_name', 'othersOptions')
+                    .order('option_value', { ascending: true })
+            ])
+
+            // Extract values or use empty arrays if there's an error
+            const presentOptions = presentComplainResult.error ? [] :
+                presentComplainResult.data?.map((item: DropdownOption) => item.option_value) || []
+            const previousOptions = previousHistoryResult.error ? [] :
+                previousHistoryResult.data?.map((item: DropdownOption) => item.option_value) || []
+            const othersOptions = othersResult.error ? [] :
+                othersResult.data?.map((item: DropdownOption) => item.option_value) || []
+
+            // Set state with unique values
+            setDynamicPresentComplainOptions([...new Set(presentOptions as string[])])
+            setDynamicPreviousHistoryOptions([...new Set(previousOptions as string[])])
+            setDynamicOthersOptions([...new Set(othersOptions as string[])])
         } catch (error) {
-          console.error('Error fetching dropdown options:', error)
+            console.error('Error fetching dropdown options:', error)
         }
-      }
+    }
 
     // Helper function to add new option permanently
-   const addNewOptionPermanently = async (fieldName: string, value: string): Promise<void> => {
-     try {
-       if (!value || !value.trim()) {
-         console.error('Value cannot be empty')
-         return
-       }
- 
-       const trimmedValue = value.trim()
-       
-       // Validate field name
-       const validFields = [
-         'doctorName',
-         'department',
-         'referredBy',
-         'medicineOptions',
-         'presentComplainOptions',
-         'previousHistoryOptions',
-         'othersOptions',
-         'others1Options',
-         'operationDetailsOptions',
-         'operationProcedureOptions',
-         'provisionDiagnosisOptions',
-         'labTestOptions'
-       ]
-       
-       if (!validFields.includes(fieldName)) {
-         console.error('Invalid field name')
-         return
-       }
- 
-       console.log('Adding new option permanently:', fieldName, trimmedValue)
-       
-       // First, check if the value already exists in Supabase (case-insensitive)
-       const { data: existingOptions, error: checkError } = await supabase
-         .from('dropdown_options')
-         .select('option_value')
-         .eq('field_name', fieldName)
-         .ilike('option_value', trimmedValue)
-         .limit(1)
- 
-       if (checkError) {
-         console.error('Supabase check failed:', checkError.message)
-         return
-       }
- 
-       if (existingOptions && existingOptions.length > 0) {
-         console.log('Value already exists')
-         return
-       }
- 
-       // Add new option to Supabase
-       const { error: insertError } = await supabase.from('dropdown_options').insert({
-         field_name: fieldName,
-         option_value: trimmedValue
-       })
- 
-       if (insertError) {
-         console.error('Supabase insert failed:', insertError.message)
-         return
-       }
- 
-       console.log(`Added '${trimmedValue}' to ${fieldName} options in Supabase`)
-       
-       // Refresh options from Supabase
-       await fetchDropdownOptions()
-     } catch (error) {
-       console.error('Error adding new dropdown option:', error)
-     }
-   }
+    const addNewOptionPermanently = async (fieldName: string, value: string): Promise<void> => {
+        try {
+            if (!value || !value.trim()) {
+                console.error('Value cannot be empty')
+                return
+            }
+
+            const trimmedValue = value.trim()
+
+            // Validate field name
+            const validFields = [
+                'doctorName',
+                'department',
+                'referredBy',
+                'medicineOptions',
+                'presentComplainOptions',
+                'previousHistoryOptions',
+                'othersOptions',
+                'others1Options',
+                'operationDetailsOptions',
+                'operationProcedureOptions',
+                'provisionDiagnosisOptions',
+                'labTestOptions'
+            ]
+
+            if (!validFields.includes(fieldName)) {
+                console.error('Invalid field name')
+                return
+            }
+
+            console.log('Adding new option permanently:', fieldName, trimmedValue)
+
+            // First, check if the value already exists in Supabase (case-insensitive)
+            const { data: existingOptions, error: checkError } = await supabase
+                .from('dropdown_options')
+                .select('option_value')
+                .eq('field_name', fieldName)
+                .ilike('option_value', trimmedValue)
+                .limit(1)
+
+            if (checkError) {
+                console.error('Supabase check failed:', checkError.message)
+                return
+            }
+
+            if (existingOptions && existingOptions.length > 0) {
+                console.log('Value already exists')
+                return
+            }
+
+            // Add new option to Supabase
+            const { error: insertError } = await supabase.from('dropdown_options').insert({
+                field_name: fieldName,
+                option_value: trimmedValue
+            })
+
+            if (insertError) {
+                console.error('Supabase insert failed:', insertError.message)
+                return
+            }
+
+            console.log(`Added '${trimmedValue}' to ${fieldName} options in Supabase`)
+
+            // Refresh options from Supabase
+            await fetchDropdownOptions()
+        } catch (error) {
+            console.error('Error adding new dropdown option:', error)
+        }
+    }
 
 
     // Fetch dropdown options on component mount
@@ -1430,7 +1562,7 @@ const CombinedForm = ({
                                             onChange={(e) => {
                                                 const currentValues = typeof formData['SIGHTTYPE'] === 'string' ? formData['SIGHTTYPE'].split('/') : [];
                                                 let newValues: string[];
-                                                
+
                                                 if (e.target.checked) {
                                                     // Add the value if it doesn't exist
                                                     if (!currentValues.includes(option.label)) {
@@ -1442,7 +1574,7 @@ const CombinedForm = ({
                                                     // Remove the value
                                                     newValues = currentValues.filter(val => val !== option.label);
                                                 }
-                                                
+
                                                 // Join with '/' and update form data
                                                 const newSightType = newValues.join('/');
                                                 setFormData({

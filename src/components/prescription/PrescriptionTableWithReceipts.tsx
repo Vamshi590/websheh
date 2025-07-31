@@ -87,6 +87,41 @@ const PrescriptionTableWithReceipts: React.FC<PrescriptionTableWithReceiptsProps
     return `₹${value}`
   }
 
+  
+  // Helper function to determine patient status based on prescription data
+  const renderPatientStatus = (prescription: Prescription): React.ReactNode => {
+    // Check for AR readings
+    const hasARReadings = [
+      'AR-RE-SPH',
+      'AR-RE-CYL',
+      'AR-RE-AXIS',
+      'AR-RE-VA',
+      'AR-RE-VAC.P.H',
+      'AR-LE-SPH',
+      'AR-LE-CYL',
+      'AR-LE-AXIS',
+      'AR-LE-VA',
+      'AR-LE-VAC.P.H'
+    ].some((field) => prescription[field] && String(prescription[field]).trim() !== '')
+
+    // Check for medical history
+    const hasMedicalHistory = ['PRESENT COMPLAIN', 'PREVIOUS HISTORY'].some(
+      (field) => prescription[field] && String(prescription[field]).trim() !== ''
+    )
+
+    if (!hasARReadings && !hasMedicalHistory) {
+      return <span className="text-red-600 font-medium">Optometrist</span>
+    } else if (hasARReadings && !hasMedicalHistory) {
+      return <span className="text-yellow-500 font-medium">Doctor</span>
+    } else if (hasARReadings && hasMedicalHistory) {
+      return <span className="text-green-600 font-medium">Complete</span>
+    } else if (!hasARReadings && hasMedicalHistory) {
+      return <span className="text-blue-600 font-medium">Medical Only</span>
+    }
+
+    return <span className="text-gray-500">Unknown</span>
+  }
+
   return (
     <div id="main-content" className="space-y-4">
       {/* Receipt Options - Only show when a prescription is selected */}
@@ -239,6 +274,12 @@ const PrescriptionTableWithReceipts: React.FC<PrescriptionTableWithReceiptsProps
                   scope="col"
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                 >
+                  Status
+                </th>
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
                   Patient ID
                 </th>
                 <th
@@ -304,17 +345,20 @@ const PrescriptionTableWithReceipts: React.FC<PrescriptionTableWithReceiptsProps
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {prescriptions.map((prescription) => (
+              {prescriptions.map((prescription, index) => (
                 <tr
                   key={`desktop-${prescription.id as string}`}
                   className={`hover:bg-gray-50 cursor-pointer ${selectedPrescription?.id === prescription.id ? 'bg-blue-50' : ''}`}
                   onClick={() => handleRowClick(prescription)}
                 >
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {formatValue(prescription.Sno)}
+                    {prescriptions.length - index}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {formatValue(prescription.DATE)}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {renderPatientStatus(prescription)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {formatValue(prescription['PATIENT ID'])}
@@ -376,13 +420,14 @@ const PrescriptionTableWithReceipts: React.FC<PrescriptionTableWithReceiptsProps
                 </p>
               </div>
               <div className="text-right">
+                {renderPatientStatus(prescription)}
                  {onEditPrescription && (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     onEditPrescription(prescription);
                   }}
-                  className="px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors"
+                  className="px-3 py-1 text-xs ml-2 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors"
                 >
                   Edit
                 </button>
