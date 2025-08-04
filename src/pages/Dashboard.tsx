@@ -31,7 +31,7 @@ const Dashboard: React.FC = () => {
     }
 
     document.addEventListener('fullscreenchange', handleFullscreenChange)
-    
+
     return () => {
       document.removeEventListener('fullscreenchange', handleFullscreenChange)
     }
@@ -78,33 +78,60 @@ const Dashboard: React.FC = () => {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           {/* Quick Actions */}
-          <div className="bg-white shadow-sm rounded-lg p-6 col-span-2">
-            <h2 className="text-lg font-medium text-gray-800 mb-4">Quick Actions</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 hover:shadow-md cursor-pointer transition-all transform hover:-translate-y-1 hover:border-indigo-100">
               <Link
-                to="/prescription"
-                className="flex flex-col items-center justify-center p-4 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-all"
+                to="/patients"
+                className=""
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-8 w-8 text-indigo-600 mb-2"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                  />
-                </svg>
-                <span className="text-gray-700">Prescription</span>
+                <div className="flex items-center mb-4">
+                  <div className="bg-indigo-100 p-3 rounded-full mr-4">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-8 w-8 text-indigo-600"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M5 4a3 3 0 00-3 3v6a3 3 0 003 3h10a3 3 0 003-3V7a3 3 0 00-3-3H5zm0 2a1 1 0 00-1 1v6a1 1 0 001 1h10a1 1 0 001-1V7a1 1 0 00-1-1H5z"
+                        clipRule="evenodd"
+                      />
+                      <path d="M7 9a1 1 0 011-1h4a1 1 0 110 2H8a1 1 0 01-1-1z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900">Manage Patients</h3>
+                </div>
+                <p className="text-gray-600 ml-16">Add, edit, and manage patients records</p>
               </Link>
             </div>
-          </div>
+            <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 hover:shadow-md cursor-pointer transition-all transform hover:-translate-y-1 hover:border-indigo-100">
+              <Link
+                to="/prescription"
+                className=""
+              >
+                <div className="flex items-center mb-4">
+                  <div className="bg-indigo-100 p-3 rounded-full mr-4">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-8 w-8 text-indigo-600"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M5 4a3 3 0 00-3 3v6a3 3 0 003 3h10a3 3 0 003-3V7a3 3 0 00-3-3H5zm0 2a1 1 0 00-1 1v6a1 1 0 001 1h10a1 1 0 001-1V7a1 1 0 00-1-1H5z"
+                        clipRule="evenodd"
+                      />
+                      <path d="M7 9a1 1 0 011-1h4a1 1 0 110 2H8a1 1 0 01-1-1z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900">Prescriptions</h3>
+                </div>
+                <p className="text-gray-600 ml-16">Manage prescriptions and receipts</p>
+              </Link>
+            </div>
         </div>
       </main>
     </div>

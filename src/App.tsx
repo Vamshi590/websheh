@@ -4,7 +4,7 @@ import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Prescription from './pages/Prescriptions'
 import ProtectedRoute from './components/ProtectedRoute'
-
+import Patients from './pages/Patients'
 function App() {
   return (
     <Router>
@@ -24,6 +24,14 @@ function App() {
           element={
             <ProtectedRoute>
               <Prescription />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/patients" 
+          element={
+            <ProtectedRoute>
+              <Patients />
             </ProtectedRoute>
           } 
         />
