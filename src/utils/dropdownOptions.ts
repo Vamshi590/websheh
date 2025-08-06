@@ -513,4 +513,16 @@ export const departmentOptions = [
     'PL',
     'NPL'
   ]
-    
+
+  // Options for near vision add values
+  export const nearAddOptions = [
+    'add +1.00',
+    'add +1.25',
+    'add +1.50',
+    'add +1.75',
+    'add +2.00',
+    'add +2.25',
+    'add +2.50',
+    'add +2.75',
+    'add +3.00'
+  ]

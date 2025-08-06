@@ -4,7 +4,7 @@ import type { Patient } from './ReceiptForm'
 import { supabase } from '../../SupabaseConfig'
 
 // Standard options for eye prescription fields and prescription options
-import { axisOptions, cylOptions, sphOptions, vaOptions, medicineOptions, adviceOptions, timingOptions } from '../../utils/dropdownOptions'
+import { axisOptions, cylOptions, sphOptions, vaOptions, medicineOptions, adviceOptions, timingOptions, nearAddOptions } from '../../utils/dropdownOptions'
 interface ReadingFormData {
     patientId: string
 
@@ -514,6 +514,52 @@ const CombinedForm = ({
     ): void => {
         const { name, value } = e.target;
 
+        
+        // Handle special add options for near SPH fields
+        if ((name === 'SR-RE-N-SPH' || name === 'SR-LE-N-SPH') && value.startsWith('add ')) {
+            // Extract the add value (e.g., '+1.25' from 'add +1.25')
+            const addValueStr = value.replace('add ', '');
+            const addValue = parseFloat(addValueStr);
+            
+            // Get the corresponding distance SPH value
+            const distanceFieldName = name === 'SR-RE-N-SPH' ? 'SR-RE-D-SPH' : 'SR-LE-D-SPH';
+            const distanceSphValue = formData[distanceFieldName] as string;
+            
+            // Only proceed if we have a valid distance SPH value
+            if (distanceSphValue) {
+                // Handle special case for 'Plano' which is equivalent to 0
+                const distanceValue = distanceSphValue === 'Plano' ? 0 : parseFloat(distanceSphValue);
+                
+                if (!isNaN(distanceValue) && !isNaN(addValue)) {
+                    // Calculate the new SPH value by adding the selected value to the distance SPH
+                    const sum = distanceValue + addValue;
+                    
+                    // Format the result with proper sign and decimal places
+                    let formattedValue;
+                    if (sum === 0) {
+                        formattedValue = 'Plano';
+                    } else {
+                        // Format to 2 decimal places
+                        formattedValue = sum.toFixed(2);
+                        // Add + sign for positive values
+                        if (!formattedValue.startsWith('-')) {
+                            formattedValue = `+${formattedValue}`;
+                        }
+                    }
+                    
+                    // Update the form data with the calculated value
+                    setFormData(prevData => ({
+                        ...prevData,
+                        [name]: formattedValue
+                    }));
+                    
+                    // Exit early since we've already updated the form data
+                    return;
+                }
+            }
+        }
+
+
         // Update the form data with the new value
         setFormData(prevData => ({
             ...prevData,
@@ -912,6 +958,265 @@ const CombinedForm = ({
                                 onChange={handleChange}
                                 className="mt-1 block w-full border border-gray-300 text-black bg-white font-semibold rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                             />
+                        </div>
+                    </div>
+
+                    {/* Section 4: Present Glass Prescription */}
+                    <div className="bg-gray-100 p-4 md:p-3 rounded-md shadow-sm border border-gray-300">
+                        <h3 className="text-lg md:text-md font-medium mb-3 md:mb-2 flex items-center">Present Glass Prescription</h3>
+
+                        {/* Right Eye - Distance */}
+                        <div className="mb-3">
+                            <h4 className="text-base md:text-sm font-medium mb-2 md:mb-1">Right Eye - Distance :</h4>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                                <div>
+                                    <label className="block text-sm md:text-xs font-medium text-gray-700">SPH</label>
+                                    <EditableCombobox
+                                        id="SR-RE-D-SPH"
+                                        name="SR-RE-D-SPH"
+                                        value={formData['SR-RE-D-SPH']}
+                                        options={sphOptions}
+                                        onChange={handleComboboxChange}
+                                        className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm md:text-xs font-medium text-gray-700">CYL</label>
+                                    <EditableCombobox
+                                        id="SR-RE-D-CYL"
+                                        name="SR-RE-D-CYL"
+                                        value={formData['SR-RE-D-CYL']}
+                                        options={cylOptions}
+                                        onChange={handleComboboxChange}
+                                        className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm md:text-xs font-medium text-gray-700">AXIS</label>
+                                    <EditableCombobox
+                                        id="SR-RE-D-AXIS"
+                                        name="SR-RE-D-AXIS"
+                                        value={formData['SR-RE-D-AXIS']}
+                                        options={axisOptions}
+                                        onChange={handleComboboxChange}
+                                        className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm md:text-xs font-medium text-gray-700">VA</label>
+                                    <EditableCombobox
+                                        id="SR-RE-D-VA"
+                                        name="SR-RE-D-VA"
+                                        value={formData['SR-RE-D-VA']}
+                                        options={vaOptions}
+                                        onChange={handleComboboxChange}
+                                        className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Right Eye - Near */}
+                        <div className="mb-3">
+                            <h4 className="text-base md:text-sm font-medium mb-2 md:mb-1">Near :</h4>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                                <div>
+                                    <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">SPH</label>
+                                    <EditableCombobox
+                                        id="SR-RE-N-SPH"
+                                        name="SR-RE-N-SPH"
+                                        value={formData['SR-RE-N-SPH']}
+                                        options={nearAddOptions}
+                                        onChange={handleComboboxChange}
+                                        className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">CYL</label>
+                                    <EditableCombobox
+                                        id="SR-RE-N-CYL"
+                                        name="SR-RE-N-CYL"
+                                        value={formData['SR-RE-N-CYL']}
+                                        options={cylOptions}
+                                        onChange={handleComboboxChange}
+                                        className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">AXIS</label>
+                                    <EditableCombobox
+                                        id="SR-RE-N-AXIS"
+                                        name="SR-RE-N-AXIS"
+                                        value={formData['SR-RE-N-AXIS']}
+                                        options={axisOptions}
+                                        onChange={handleComboboxChange}
+                                        className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">VA</label>
+                                    <EditableCombobox
+                                        id="SR-RE-N-VA"
+                                        name="SR-RE-N-VA"
+                                        value={formData['SR-RE-N-VA']}
+                                        options={vaOptions}
+                                        onChange={handleComboboxChange}
+                                        className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Left Eye - Distance */}
+                        <div className="mb-3">
+                            <h4 className="text-base md:text-sm font-medium mb-2 md:mb-1">Left Eye - Distance :</h4>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                                <div>
+                                    <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">SPH</label>
+                                    <EditableCombobox
+                                        id="SR-LE-D-SPH"
+                                        name="SR-LE-D-SPH"
+                                        value={formData['SR-LE-D-SPH']}
+                                        options={sphOptions}
+                                        onChange={handleComboboxChange}
+                                        className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">CYL</label>
+                                    <EditableCombobox
+                                        id="SR-LE-D-CYL"
+                                        name="SR-LE-D-CYL"
+                                        value={formData['SR-LE-D-CYL']}
+                                        options={cylOptions}
+                                        onChange={handleComboboxChange}
+                                        className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">AXIS</label>
+                                    <EditableCombobox
+                                        id="SR-LE-D-AXIS"
+                                        name="SR-LE-D-AXIS"
+                                        value={formData['SR-LE-D-AXIS']}
+                                        options={axisOptions}
+                                        onChange={handleComboboxChange}
+                                        className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">BCVA</label>
+                                    <EditableCombobox
+                                        id="SR-LE-D-BCVA"
+                                        name="SR-LE-D-BCVA"
+                                        value={formData['SR-LE-D-BCVA']}
+                                        options={vaOptions}
+                                        onChange={handleComboboxChange}
+                                        className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Left Eye - Near */}
+                        <div className="mb-1">
+                            <h4 className="text-base md:text-sm font-medium mb-2 md:mb-1">Near :</h4>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                                <div>
+                                    <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">SPH</label>
+                                    <EditableCombobox
+                                        id="SR-LE-N-SPH"
+                                        name="SR-LE-N-SPH"
+                                        value={formData['SR-LE-N-SPH']}
+                                        options={nearAddOptions}
+                                        onChange={handleComboboxChange}
+                                        className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">CYL</label>
+                                    <EditableCombobox
+                                        id="SR-LE-N-CYL"
+                                        name="SR-LE-N-CYL"
+                                        value={formData['SR-LE-N-CYL']}
+                                        options={cylOptions}
+                                        onChange={handleComboboxChange}
+                                        className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">AXIS</label>
+                                    <EditableCombobox
+                                        id="SR-LE-N-AXIS"
+                                        name="SR-LE-N-AXIS"
+                                        value={formData['SR-LE-N-AXIS']}
+                                        options={axisOptions}
+                                        onChange={handleComboboxChange}
+                                        className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">BCVA</label>
+                                    <EditableCombobox
+                                        id="SR-LE-N-BCVA"
+                                        name="SR-LE-N-BCVA"
+                                        value={formData['SR-LE-N-BCVA']}
+                                        options={vaOptions}
+                                        onChange={handleComboboxChange}
+                                        className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Sight Type Options */}
+                        <div className="mt-4 border-t pt-3 border-gray-300 w-full">
+                            <h4 className="text-sm font-medium mb-2">Sight Type:</h4>
+                            <div className="flex flex-wrap justify-between gap-4">
+                                {[
+                                    { id: 'distant', label: 'Distant' },
+                                    { id: 'near', label: 'Near' },
+                                    { id: 'bifocal', label: 'Bifocal' },
+                                    { id: 'progressive', label: 'Progressive' },
+                                    { id: 'photochromatic', label: 'Photochromatic' },
+                                    { id: 'brc-hmc', label: 'BRC HMC' }
+                                ].map((option) => (
+                                    <div key={option.id} className="flex items-center">
+                                        <input
+                                            type="checkbox"
+                                            id={`sight-type-${option.id}`}
+                                            checked={typeof formData['SIGHTTYPE'] === 'string' && (formData['SIGHTTYPE'].includes(`${option.label}/`) || formData['SIGHTTYPE'].includes(`/${option.label}`) || formData['SIGHTTYPE'] === option.label || formData['SIGHTTYPE'].endsWith(`/${option.label}`)) || false}
+                                            onChange={(e) => {
+                                                const currentValues = typeof formData['SIGHTTYPE'] === 'string' ? formData['SIGHTTYPE'].split('/') : [];
+                                                let newValues: string[];
+
+                                                if (e.target.checked) {
+                                                    // Add the value if it doesn't exist
+                                                    if (!currentValues.includes(option.label)) {
+                                                        newValues = [...currentValues, option.label];
+                                                    } else {
+                                                        newValues = currentValues;
+                                                    }
+                                                } else {
+                                                    // Remove the value
+                                                    newValues = currentValues.filter(val => val !== option.label);
+                                                }
+
+                                                // Join with '/' and update form data
+                                                const newSightType = newValues.join('/');
+                                                setFormData({
+                                                    ...formData,
+                                                    'SIGHTTYPE': newSightType
+                                                });
+                                            }}
+                                            className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                        />
+                                        <label htmlFor={`sight-type-${option.id}`} className="ml-2 text-sm text-gray-700">
+                                            {option.label}
+                                        </label>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     </div>
                     {/* Section 1: Glasses Reading (GR) */}
@@ -1334,264 +1639,7 @@ const CombinedForm = ({
                         </div>
                     </div>
 
-                    {/* Section 4: Present Glass Prescription */}
-                    <div className="bg-gray-100 p-4 md:p-3 rounded-md shadow-sm border border-gray-300">
-                        <h3 className="text-lg md:text-md font-medium mb-3 md:mb-2 flex items-center">Present Glass Prescription</h3>
 
-                        {/* Right Eye - Distance */}
-                        <div className="mb-3">
-                            <h4 className="text-base md:text-sm font-medium mb-2 md:mb-1">Right Eye - Distance :</h4>
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                                <div>
-                                    <label className="block text-sm md:text-xs font-medium text-gray-700">SPH</label>
-                                    <EditableCombobox
-                                        id="SR-RE-D-SPH"
-                                        name="SR-RE-D-SPH"
-                                        value={formData['SR-RE-D-SPH']}
-                                        options={sphOptions}
-                                        onChange={handleComboboxChange}
-                                        className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm md:text-xs font-medium text-gray-700">CYL</label>
-                                    <EditableCombobox
-                                        id="SR-RE-D-CYL"
-                                        name="SR-RE-D-CYL"
-                                        value={formData['SR-RE-D-CYL']}
-                                        options={cylOptions}
-                                        onChange={handleComboboxChange}
-                                        className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm md:text-xs font-medium text-gray-700">AXIS</label>
-                                    <EditableCombobox
-                                        id="SR-RE-D-AXIS"
-                                        name="SR-RE-D-AXIS"
-                                        value={formData['SR-RE-D-AXIS']}
-                                        options={axisOptions}
-                                        onChange={handleComboboxChange}
-                                        className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm md:text-xs font-medium text-gray-700">VA</label>
-                                    <EditableCombobox
-                                        id="SR-RE-D-VA"
-                                        name="SR-RE-D-VA"
-                                        value={formData['SR-RE-D-VA']}
-                                        options={vaOptions}
-                                        onChange={handleComboboxChange}
-                                        className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Right Eye - Near */}
-                        <div className="mb-3">
-                            <h4 className="text-base md:text-sm font-medium mb-2 md:mb-1">Near :</h4>
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                                <div>
-                                    <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">SPH</label>
-                                    <EditableCombobox
-                                        id="SR-RE-N-SPH"
-                                        name="SR-RE-N-SPH"
-                                        value={formData['SR-RE-N-SPH']}
-                                        options={sphOptions}
-                                        onChange={handleComboboxChange}
-                                        className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">CYL</label>
-                                    <EditableCombobox
-                                        id="SR-RE-N-CYL"
-                                        name="SR-RE-N-CYL"
-                                        value={formData['SR-RE-N-CYL']}
-                                        options={cylOptions}
-                                        onChange={handleComboboxChange}
-                                        className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">AXIS</label>
-                                    <EditableCombobox
-                                        id="SR-RE-N-AXIS"
-                                        name="SR-RE-N-AXIS"
-                                        value={formData['SR-RE-N-AXIS']}
-                                        options={axisOptions}
-                                        onChange={handleComboboxChange}
-                                        className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">VA</label>
-                                    <EditableCombobox
-                                        id="SR-RE-N-VA"
-                                        name="SR-RE-N-VA"
-                                        value={formData['SR-RE-N-VA']}
-                                        options={vaOptions}
-                                        onChange={handleComboboxChange}
-                                        className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Left Eye - Distance */}
-                        <div className="mb-3">
-                            <h4 className="text-base md:text-sm font-medium mb-2 md:mb-1">Left Eye - Distance :</h4>
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                                <div>
-                                    <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">SPH</label>
-                                    <EditableCombobox
-                                        id="SR-LE-D-SPH"
-                                        name="SR-LE-D-SPH"
-                                        value={formData['SR-LE-D-SPH']}
-                                        options={sphOptions}
-                                        onChange={handleComboboxChange}
-                                        className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">CYL</label>
-                                    <EditableCombobox
-                                        id="SR-LE-D-CYL"
-                                        name="SR-LE-D-CYL"
-                                        value={formData['SR-LE-D-CYL']}
-                                        options={cylOptions}
-                                        onChange={handleComboboxChange}
-                                        className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">AXIS</label>
-                                    <EditableCombobox
-                                        id="SR-LE-D-AXIS"
-                                        name="SR-LE-D-AXIS"
-                                        value={formData['SR-LE-D-AXIS']}
-                                        options={axisOptions}
-                                        onChange={handleComboboxChange}
-                                        className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">BCVA</label>
-                                    <EditableCombobox
-                                        id="SR-LE-D-BCVA"
-                                        name="SR-LE-D-BCVA"
-                                        value={formData['SR-LE-D-BCVA']}
-                                        options={vaOptions}
-                                        onChange={handleComboboxChange}
-                                        className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Left Eye - Near */}
-                        <div className="mb-1">
-                            <h4 className="text-base md:text-sm font-medium mb-2 md:mb-1">Near :</h4>
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                                <div>
-                                    <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">SPH</label>
-                                    <EditableCombobox
-                                        id="SR-LE-N-SPH"
-                                        name="SR-LE-N-SPH"
-                                        value={formData['SR-LE-N-SPH']}
-                                        options={sphOptions}
-                                        onChange={handleComboboxChange}
-                                        className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">CYL</label>
-                                    <EditableCombobox
-                                        id="SR-LE-N-CYL"
-                                        name="SR-LE-N-CYL"
-                                        value={formData['SR-LE-N-CYL']}
-                                        options={cylOptions}
-                                        onChange={handleComboboxChange}
-                                        className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">AXIS</label>
-                                    <EditableCombobox
-                                        id="SR-LE-N-AXIS"
-                                        name="SR-LE-N-AXIS"
-                                        value={formData['SR-LE-N-AXIS']}
-                                        options={axisOptions}
-                                        onChange={handleComboboxChange}
-                                        className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">BCVA</label>
-                                    <EditableCombobox
-                                        id="SR-LE-N-BCVA"
-                                        name="SR-LE-N-BCVA"
-                                        value={formData['SR-LE-N-BCVA']}
-                                        options={vaOptions}
-                                        onChange={handleComboboxChange}
-                                        className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Sight Type Options */}
-                        <div className="mt-4 border-t pt-3 border-gray-300 w-full">
-                            <h4 className="text-sm font-medium mb-2">Sight Type:</h4>
-                            <div className="flex flex-wrap justify-between gap-4">
-                                {[
-                                    { id: 'distant', label: 'Distant' },
-                                    { id: 'near', label: 'Near' },
-                                    { id: 'bifocal', label: 'Bifocal' },
-                                    { id: 'progressive', label: 'Progressive' },
-                                    { id: 'photochromatic', label: 'Photochromatic' },
-                                    { id: 'brc-hmc', label: 'BRC HMC' }
-                                ].map((option) => (
-                                    <div key={option.id} className="flex items-center">
-                                        <input
-                                            type="checkbox"
-                                            id={`sight-type-${option.id}`}
-                                            checked={typeof formData['SIGHTTYPE'] === 'string' && (formData['SIGHTTYPE'].includes(`${option.label}/`) || formData['SIGHTTYPE'].includes(`/${option.label}`) || formData['SIGHTTYPE'] === option.label || formData['SIGHTTYPE'].endsWith(`/${option.label}`)) || false}
-                                            onChange={(e) => {
-                                                const currentValues = typeof formData['SIGHTTYPE'] === 'string' ? formData['SIGHTTYPE'].split('/') : [];
-                                                let newValues: string[];
-
-                                                if (e.target.checked) {
-                                                    // Add the value if it doesn't exist
-                                                    if (!currentValues.includes(option.label)) {
-                                                        newValues = [...currentValues, option.label];
-                                                    } else {
-                                                        newValues = currentValues;
-                                                    }
-                                                } else {
-                                                    // Remove the value
-                                                    newValues = currentValues.filter(val => val !== option.label);
-                                                }
-
-                                                // Join with '/' and update form data
-                                                const newSightType = newValues.join('/');
-                                                setFormData({
-                                                    ...formData,
-                                                    'SIGHTTYPE': newSightType
-                                                });
-                                            }}
-                                            className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                                        />
-                                        <label htmlFor={`sight-type-${option.id}`} className="ml-2 text-sm text-gray-700">
-                                            {option.label}
-                                        </label>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
 
                     {/* Section 5: Clinical Findings (CF) */}
                     <div className="p-3 bg-gray-100 border border-gray-300 rounded-md">
