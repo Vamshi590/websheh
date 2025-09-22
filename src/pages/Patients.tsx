@@ -4,13 +4,83 @@ import { PDFDocument } from 'pdf-lib'
 import PatientTable from '../components/patients/PatientTable'
 import PatientEditModal from '../components/patients/PatientEditModal'
 import PatientForm from '../components/patients/PatientForm'
-import ReceiptForm from '../components/prescription/ReceiptForm'
+import ReceiptForm, { type Patient as ReceiptPatient } from '../components/prescription/ReceiptForm'
+import ReceiptViewer from '../components/reports/ReceiptViewer'
 import { toast, Toaster } from 'sonner'
-import { supabase } from '../SupabaseConfig'
-import { v4 as uuidv4 } from 'uuid'
-import { toZonedTime } from 'date-fns-tz'
+import InPatients from './Inpatients'
+import { format, parseISO } from 'date-fns'
+import { toZonedTime, formatInTimeZone } from 'date-fns-tz'
+import { addPatient, deletePatient, getPatientById, getPatientsByDate, updatePatient } from '../components/patients/api'
+import { addPrescription } from '../components/prescription/api'
 import { useNavigate } from 'react-router-dom'
 
+// Patient Add Modal Component
+interface PatientAddModalProps {
+  isOpen: boolean
+  onClose: () => void
+  onSubmit: (formData: Omit<Patient, 'id'>) => Promise<Patient>
+  patientCount: number
+  onCreateReceipt?: (patient: Patient) => void
+}
+
+const PatientAddModal: React.FC<PatientAddModalProps> = ({
+  isOpen,
+  onClose,
+  onSubmit,
+  patientCount,
+  onCreateReceipt
+}) => {
+  if (!isOpen) return null
+
+  return (
+    <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="p-6">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xl font-semibold text-gray-800 flex items-center">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6 mr-2 text-blue-500"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+              </svg>
+              Add New Patient
+            </h2>
+            <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
+          <PatientForm
+            onSubmit={onSubmit}
+            patientCount={patientCount}
+            onCreateReceipt={onCreateReceipt}
+          />
+        </div>
+      </div>
+    </div>
+  )
+}
+// Define types for API responses
+interface ApiResponse<T> {
+  success: boolean
+  data: T
+  message: string
+}
 
 // Define types for receipt viewer
 type Prescription = {
@@ -45,7 +115,7 @@ export interface Patient {
   gender: string
   phone: string
   address: string
-  date: string
+  date?: string
   dob: string
   guardian: string
   status?: string
@@ -53,6 +123,7 @@ export interface Patient {
   department?: string
   referredBy?: string
   createdBy?: string
+  created_at?: string // Add created_at field from database
   // Optional uppercase variants for ReceiptForm compatibility
   NAME?: string
   AGE?: string
@@ -64,38 +135,28 @@ export interface Patient {
   GUARDIAN?: string
 }
 
-export interface Receipt {
-    id: string
-    date: string
-    patientId: string
-    name: string
-    guardian?: string
-    phone: string
-    age: string
-    gender: string
-    address: string
-    dob?: string
-    // Include uppercase versions for compatibility with form data
-    AGE?: string
-    GENDER?: string
-    ADDRESS?: string
-    DOB?: string
-    doctorName?: string
-    // Add index signature to make Receipt compatible with Patient
-    [key: string]: unknown
-    department?: string
-    referredBy?: string
-  }
-
 const Patients: React.FC = () => {
   const [patients, setPatients] = useState<Patient[]>([])
   const [loading, setLoading] = useState(true)
   const [showAddForm, setShowAddForm] = useState(false)
+  const [showAddIPForm, setShowAddIPForm] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null)
   const [showReceiptForm, setShowReceiptForm] = useState(false)
   const [showPrintOptions, setShowPrintOptions] = useState(false)
   const [lastCreatedReceipt, setLastCreatedReceipt] = useState<Prescription | null>(null)
+  // OP/IP Toggle state
+  const [viewMode, setViewMode] = useState<'OP' | 'IP'>('OP')
+  // Selected date state - default to today
+  const [selectedDate, setSelectedDate] = useState<string>(
+    format(toZonedTime(new Date(), 'Asia/Kolkata'), 'yyyy-MM-dd')
+  )
+  // Patient search states
+  const [searchPatientId, setSearchPatientId] = useState<string>('')
+  const [searchResults, setSearchResults] = useState<Patient[]>([])
+  const [isSearching, setIsSearching] = useState(false)
+  const [noResultsFound, setNoResultsFound] = useState(false)
+
   const navigate = useNavigate()
   // Ref for receipt element that will be used for printing
   const receiptRef = useRef<HTMLDivElement>(null)
@@ -119,174 +180,155 @@ const Patients: React.FC = () => {
     }
   }
 
-  // Load today's patients on component mount
+  // Load patients for the selected date
   useEffect(() => {
-    const fetchTodaysPatients = async (): Promise<void> => {
+    const fetchPatientsByDate = async (date: string): Promise<void> => {
       try {
         setLoading(true)
-        
-        // Get current date in Indian timezone
-        const indianTime = toZonedTime(new Date(), 'Asia/Kolkata')
-
-        // Create start of day timestamp (00:00:00) in Indian timezone
-        const startOfDay = new Date(indianTime)
-        startOfDay.setHours(0, 0, 0, 0)
-
-        // Create end of day timestamp (23:59:59.999) in Indian timezone
-        const endOfDay = new Date(indianTime)
-        endOfDay.setHours(23, 59, 59, 999)
-
-        // Convert to ISO strings for Supabase query
-        const startTimestamp = startOfDay.toISOString()
-        const endTimestamp = endOfDay.toISOString()
-
-        console.log(`Fetching patients between ${startTimestamp} and ${endTimestamp}`)
-
-        // Query Supabase directly
-        const { data: patientsData, error } = await supabase
-          .from('patients')
-          .select('*')
-          .gte('created_at', startTimestamp)
-          .lte('created_at', endTimestamp)
-          .order('patientId', { ascending: false })
-
-        if (error) {
-          throw new Error(`Supabase error: ${error.message}`)
-        }
-
-        console.log("Today's patients fetched from Supabase successfully")
-        const response = { 
-          success: true, 
-          data: patientsData || [], 
-          message: "Today's patients fetched successfully" 
-        }
-        
+        // Use type assertion for API calls with more specific types
+        const response = (await getPatientsByDate(date)) as ApiResponse<Patient[]>
         console.log(response)
 
         if (response.success) {
-          setPatients(response.data)
+          // Format the created_at timestamp in Indian timezone with time in 24-hour format
+          const formattedPatients = response.data.map((patient) => ({
+            ...patient,
+            date: patient.created_at
+              ? formatInTimeZone(parseISO(patient.created_at), 'Asia/Kolkata', 'dd-MM-yyyy HH:mm')
+              : undefined
+          }))
+          console.log(formattedPatients)
+          setPatients(formattedPatients)
           // Optional success toast
           // toast.success(response.message)
         } else {
-          console.error("Error loading today's patients:", response.message)
+          console.error(`Error loading patients for ${date}:`, response.message)
           toast.error(response.message)
         }
       } catch (err) {
-        console.error("Error loading today's patients:", err)
-        toast.error("Failed to load today's patients")
+        console.error(`Error loading patients for ${date}:`, err)
+        toast.error(`Failed to load patients for ${format(parseISO(date), 'dd-MM-yyyy')}`)
       } finally {
         setLoading(false)
       }
     }
 
-    fetchTodaysPatients()
-  }, [])
-  // Function to handle adding a patient (used via PatientForm component)
-  // This function is passed to PatientForm component through props
-  // ESLint shows it as unused because it's passed as a prop rather than called directly
-  const handleAddPatient = async (patient: Omit<Patient, 'id'>): Promise<void> => {
+    fetchPatientsByDate(selectedDate)
+  }, [selectedDate])
+  const handleAddPatient = async (patient: Omit<Patient, 'id'>): Promise<Patient> => {
     try {
       setLoading(true)
-      
-      // Validate required patient data
-      if (!patient || !patient.patientId || !patient.name) {
-        toast.error('Missing required patient information')
-        return
-      }
+      const response = (await addPatient(patient)) as ApiResponse<Patient>
 
-      // Generate a unique ID for the patient
-      const patientWithId = { ...patient, id: uuidv4() }
-
-      // Add the patient to Supabase directly
-      const { data, error } = await supabase.from('patients').insert([patientWithId]).select()
-
-      if (error) {
-        throw new Error(`Supabase error: ${error.message}`)
-      }
-
-      if (!data || data.length === 0) {
-        throw new Error('Patient was not added to the database')
-      }
-
-      console.log('Patient added to Supabase:', data)
-      const response = { 
-        success: true, 
-        data: patientWithId, 
-        message: 'Patient added successfully' 
-      }
-
-      // Strict check for success and valid data
       if (response.success === true && response.data) {
         const addedPatient = response.data
-        setPatients([...patients, addedPatient])
+        setPatients([addedPatient, ...patients])
 
-        // Show success toast
         toast.success(response.message || 'Patient added successfully')
 
-        // Set the selected patient for receipt creation and show receipt form
         setSelectedPatient(addedPatient)
-        setShowReceiptForm(true)
+        setShowAddForm(false)
+        return addedPatient
       } else {
-        // Show error toast with the message from the backend
         toast.error(response.message || 'Failed to add patient')
-        // Close the form when there's an error
         setShowAddForm(false)
         setShowReceiptForm(false)
+        throw new Error(response.message || 'Failed to add patient')
       }
     } catch (err) {
       console.error('Error adding patient:', err)
       toast.error('Failed to add patient')
-      // Close the form when there's an error
       setShowAddForm(false)
       setShowReceiptForm(false)
+      throw err
     } finally {
       setLoading(false)
     }
   }
 
   // Function to handle creating a receipt after patient creation (used internally)
-  // This function is passed to PatientForm component as onCreateReceipt prop
-  // ESLint shows it as unused because it's passed as a prop rather than called directly
   const handleCreateReceipt = (patient: Patient): void => {
     setSelectedPatient(patient)
     setShowReceiptForm(true)
   }
 
-  // Function to handle adding a receipt
+  // Function to handle patient search by ID
+  const handlePatientSearch = async (): Promise<void> => {
+    if (!searchPatientId.trim()) {
+      return
+    }
+
+    try {
+      setIsSearching(true)
+      setNoResultsFound(false)
+      setSearchResults([])
+
+      const response = (await getPatientById(searchPatientId)) as ApiResponse<Patient>
+
+      console.log(response)
+
+      if (response.success && response.data) {
+        // If a single patient is returned
+        setSearchResults([response.data])
+      }
+    } catch (err) {
+      console.error('Error searching for patient:', err)
+      // Fallback to local search
+      const filteredPatients = patients.filter((patient) =>
+        patient.patientId.toLowerCase().includes(searchPatientId.toLowerCase())
+      )
+
+      if (filteredPatients.length > 0) {
+        setSearchResults(filteredPatients)
+      } else {
+        setNoResultsFound(true)
+      }
+    } finally {
+      setIsSearching(false)
+    }
+  }
+
+  // Function to handle patient selection from search results
+  const handlePatientSelect = (patient: Patient): void => {
+    setSelectedPatient(patient)
+    setSearchPatientId('')
+    setSearchResults([])
+    setNoResultsFound(false)
+    setShowReceiptForm(true) // Open receipt form when patient is selected
+  }
+
+  // Function to clear search results when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (): void => {
+      setSearchResults([])
+      setNoResultsFound(false)
+    }
+
+    document.addEventListener('click', handleClickOutside)
+    return () => {
+      document.removeEventListener('click', handleClickOutside)
+    }
+  }, [])
+
   const handleAddReceipt = async (formData: Record<string, unknown>): Promise<void> => {
     try {
       setLoading(true)
-
-      // Create a complete receipt object with all necessary fields
       const receiptData = {
         ...formData,
         TYPE: 'RECEIPT',
-        DATE: formData.DATE || new Date().toISOString().split('T')[0],
-        'PATIENT ID': selectedPatient?.patientId || formData.patientId || '',
-        'PATIENT NAME': selectedPatient?.name || formData['PATIENT NAME'] || '',
-        GENDER: selectedPatient?.gender || formData.GENDER || '',
-        AGE: selectedPatient?.age || formData.AGE || '',
+        DATE: format(toZonedTime(new Date(), 'Asia/Kolkata'), 'yyyy-MM-dd'),
+        'PATIENT ID': selectedPatient?.patientId || (formData.patientId as string) || '',
+        'PATIENT NAME': selectedPatient?.name || (formData['PATIENT NAME'] as string) || '',
+        GENDER: selectedPatient?.gender || (formData.GENDER as string) || '',
+        AGE: selectedPatient?.age || (formData?.AGE as string | number) || '',
         'CREATED BY':
-          JSON.parse(localStorage.getItem('currentUser') || '{}')?.fullName || 'Unknown User',
-        id: uuidv4() // Generate a unique ID for the prescription
+          JSON.parse(localStorage.getItem('currentUser') || '{}')?.fullName || 'Unknown User'
       }
-
-      console.log('Adding receipt with data:', receiptData)
-      
-      // Add prescription directly to Supabase
-      const { data, error } = await supabase.from('prescriptions').insert([receiptData]).select()
-      
-      if (error) {
-        throw new Error(`Supabase error: ${error.message}`)
+      const result = (await addPrescription(receiptData)) as {
+        success: boolean
+        data: Record<string, unknown> | null
+        message: string
       }
-      
-      const result = {
-        success: true,
-        data: data && data.length > 0 ? data[0] : null,
-        message: 'Receipt added successfully'
-      }
-
-      console.log('Receipt creation result:', result)
 
       if (result.success && result.data) {
         // Create a receipt object from the successful response data
@@ -297,15 +339,13 @@ const Patients: React.FC = () => {
           GENDER: String(selectedPatient?.gender || formData.GENDER || ''),
           AGE: String(selectedPatient?.age || formData.AGE || ''),
           TYPE: 'RECEIPT',
-          DATE: String(formData.DATE || new Date().toISOString().split('T')[0]),
+          DATE:
+            String(format(toZonedTime(new Date(), 'Asia/Kolkata'), 'yyyy-MM-dd')) || formData?.date,
           'CREATED BY': String(
             JSON.parse(localStorage.getItem('currentUser') || '{}')?.fullName || 'Unknown User'
           ),
           ...formData
         }
-
-        // Set the created receipt and show print options
-        console.log('Setting last created receipt:', createdReceipt)
         setLastCreatedReceipt(createdReceipt)
         setShowPrintOptions(true)
 
@@ -382,20 +422,13 @@ const Patients: React.FC = () => {
 
       const pdfBytes = await pdfDoc.save()
 
-      // Create a blob from the PDF bytes
-      const blob = new Blob([pdfBytes], { type: 'application/pdf' })
-      
-      // Create a URL for the blob
-      const url = URL.createObjectURL(blob)
-      
-      // Open the PDF in a new browser tab
-      window.open(url, '_blank')
-      
-      // Clean up the URL object after a delay
-      setTimeout(() => {
-        URL.revokeObjectURL(url)
-      }, 30000) // 30 seconds should be enough time for the PDF to load
-      
+      // Use Electron's IPC to open the PDF in a native window
+      const result = await window.api.openPdfInWindow(pdfBytes)
+
+      if (!result.success) {
+        console.error('Failed to open PDF in window:', result.error)
+        toast.error('Failed to open PDF preview')
+      }
     } catch (error) {
       console.error('Error generating PDF for preview:', error)
       toast.error('Failed to generate PDF preview')
@@ -408,23 +441,8 @@ const Patients: React.FC = () => {
   const handleUpdatePatient = async (id: string, patient: Omit<Patient, 'id'>): Promise<void> => {
     try {
       setLoading(true)
-      
-      // Update patient directly in Supabase
-      const { data, error } = await supabase
-        .from('patients')
-        .update({ ...patient })
-        .eq('id', id)
-        .select()
-      
-      if (error) {
-        throw new Error(`Supabase error: ${error.message}`)
-      }
-      
-      const response = {
-        success: true,
-        data: data && data.length > 0 ? data[0] : null,
-        message: 'Patient updated successfully'
-      }
+      // Use type assertion for API calls with more specific types
+      const response = (await updatePatient(id, patient)) as ApiResponse<Patient>
 
       if (response.success) {
         // If the backend returns the updated patient, use that data
@@ -452,22 +470,8 @@ const Patients: React.FC = () => {
   const handleDeletePatient = async (id: string): Promise<void> => {
     try {
       setLoading(true)
-      
-      // Delete patient directly from Supabase
-      const { error } = await supabase
-        .from('patients')
-        .delete()
-        .eq('id', id)
-      
-      if (error) {
-        throw new Error(`Supabase error: ${error.message}`)
-      }
-      
-      const response = {
-        success: true,
-        data: null,
-        message: 'Patient deleted successfully'
-      }
+      // Use type assertion for API calls with more specific types
+      const response = (await deletePatient(id)) as ApiResponse<null>
 
       if (response.success) {
         setPatients(patients.filter((p) => p.id !== id))
@@ -492,34 +496,73 @@ const Patients: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-6 py-4 sm:px-8 lg:px-10 flex justify-between items-center">
+    <div className="min-h-screen bg-gray-100">
+      <header className="bg-white shadow-lg sticky top-0 z-10">
+        <div className="mx-auto px-6 py-4 sm:px-8 lg:px-10 flex justify-between items-center">
           <div>
             <h1 className="text-2xl font-medium text-gray-800">Patient Management</h1>
             <p className="text-sm text-gray-500">Sri Harsha Eye Hospital</p>
           </div>
-          <div className="flex items-center space-x-3">
+
+          {/* OP/IP Toggle Switch */}
+          <div className="flex items-center bg-gray-100 rounded-lg p-1">
             <button
-              onClick={() => setShowAddForm(!showAddForm)}
-              className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors shadow-sm flex items-center space-x-1.5"
+              onClick={() => setViewMode('OP')}
+              className={`px-4 py-2 rounded-md transition-colors ${viewMode === 'OP' ? 'bg-white shadow-sm text-blue-600 font-medium' : 'text-gray-600 hover:bg-gray-200'}`}
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              <span>{showAddForm ? 'Hide Form' : 'Add Patient'}</span>
+              Out-Patient
             </button>
             <button
-              onClick={() => navigate('/dashboard')}
+              onClick={() => setViewMode('IP')}
+              className={`px-4 py-2 rounded-md transition-colors ${viewMode === 'IP' ? 'bg-white shadow-sm text-blue-600 font-medium' : 'text-gray-600 hover:bg-gray-200'}`}
+            >
+              In-Patient
+            </button>
+          </div>
+
+          <div className="flex items-center space-x-3">
+            {viewMode === 'OP' && (
+              <button
+                onClick={() => setShowAddForm(true)}
+                className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors shadow-sm flex items-center space-x-1.5"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                <span>Add Patient</span>
+              </button>
+            )}
+            {viewMode === 'IP' && (
+              <button
+                onClick={() => setShowAddIPForm(!showAddIPForm)}
+                className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors shadow-sm flex items-center space-x-1.5"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                <span>{showAddIPForm ? 'Hide Form' : 'Add In-Patient'}</span>
+              </button>
+            )}
+            <button
+              onClick={() => (navigate('/dashboard'))}
               className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md transition-colors shadow-sm flex items-center space-x-1.5"
             >
               <svg
@@ -539,98 +582,205 @@ const Patients: React.FC = () => {
           </div>
         </div>
       </header>
+      <div className="w-full mx-auto flex justify-between items-center bg-gray-200 shadow-sm sticky top-21 z-10">
+        <div className="ml-4 flex space-x-3 px-6 py-2">
+          <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-md shadow-sm hover:bg-blue-700 transition-colors">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fillRule="evenodd"
+                d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"
+                clipRule="evenodd"
+              />
+            </svg>
+            <span>All Bills</span>
+          </button>
+          <button className="flex items-center space-x-2 px-4 py-2 cursor-pointer bg-white text-gray-700 rounded-md shadow-sm hover:bg-gray-300 transition-colors">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+            </svg>
+            <span>Patients Q</span>
+          </button>
+        </div>
 
-      <main className="max-w-7xl mx-auto px-6 py-8 sm:px-8 lg:px-10">
-        {/* Patient Add Form */}
-        {showAddForm && (
-          <div className="mb-8 bg-white p-6 rounded-lg shadow-sm border border-gray-100 transition-all">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-medium text-gray-800 flex items-center">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6 mr-2 text-blue-500"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
-                </svg>
-                Add New Patient
-              </h2>
+        <div className="px-6 py-2 mr-4 flex justify-end items-center space-x-4">
+          {/* Patient ID Search */}
+          <div className="relative flex items-center space-x-2">
+            <label htmlFor="patient-search" className="text-sm font-medium text-gray-600">
+              Patient ID:
+            </label>
+            <div className="flex">
+              <input
+                id="patient-search"
+                type="text"
+                placeholder="Enter patient ID"
+                value={searchPatientId}
+                onChange={(e) => setSearchPatientId(e.target.value)}
+                className="pl-3 pr-4 py-2 w-48 border border-gray-300 bg-white rounded-l-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
               <button
-                onClick={() => setShowAddForm(false)}
-                className="text-gray-400 hover:text-gray-600"
+                onClick={handlePatientSearch}
+                disabled={isSearching}
+                className="px-4 py-2 bg-blue-500 text-white rounded-r-md hover:bg-blue-600 transition-colors flex items-center"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                    clipRule="evenodd"
-                  />
-                </svg>
+                {isSearching ? (
+                  <svg
+                    className="animate-spin h-5 w-5"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                ) : (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
+                  </svg>
+                )}
               </button>
             </div>
-            <PatientForm
+
+            {/* Search Results Dropdown */}
+            {searchResults.length > 0 && (
+              <div className="absolute top-full left-24 mt-1 w-72 bg-white border border-gray-300 rounded-md shadow-lg z-10 max-h-60 overflow-auto">
+                {searchResults.map((patient) => (
+                  <div
+                    key={patient.id}
+                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                    onClick={() => handlePatientSelect(patient)}
+                  >
+                    <div className="font-medium">
+                      {patient.patientId} - {patient.name}
+                    </div>
+                    <div className="text-sm text-gray-600">{patient.phone}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* No Results Message */}
+            {noResultsFound && (
+              <div className="absolute top-full left-24 mt-1 w-72 bg-white border border-gray-300 rounded-md shadow-lg z-10 p-4 text-center">
+                <p className="text-gray-500">No patients found with this ID</p>
+              </div>
+            )}
+          </div>
+
+          {/* Date Selector */}
+          <div className="flex items-center space-x-3">
+            <label htmlFor="date-selector" className="text-sm font-medium text-gray-600">
+              Select Date:
+            </label>
+            <input
+              id="date-selector"
+              type="date"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              className="px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+        </div>
+      </div>
+
+      <main className="mx-auto px-4 pb-8 sm:px-8 lg:px-10">
+        {viewMode === 'IP' && (
+          <InPatients showAddForm={showAddIPForm} setShowAddForm={setShowAddIPForm} />
+        )}
+
+        {viewMode === 'OP' && (
+          <>
+            {/* Patient Add Modal */}
+            <PatientAddModal
+              isOpen={showAddForm}
+              onClose={() => setShowAddForm(false)}
               onSubmit={handleAddPatient}
               patientCount={patients.length}
               onCreateReceipt={handleCreateReceipt}
             />
-          </div>
-        )}
-        {loading && <p className="text-center">Loading...</p>}
-        {!loading && patients.length === 0 ? (
-          <div className="text-center py-12 border border-dashed border-gray-200 rounded-lg bg-white">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-16 w-16 mx-auto text-gray-300 mb-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1}
-                d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"
-              />
-            </svg>
-            <p className="text-gray-600 text-lg mb-2">No patients found</p>
-            <p className="text-gray-500 mb-6">
-              Click the &quot;Add Patient&quot; button to create your first patient record today
-            </p>
-            <button
-              onClick={() => setShowAddForm(true)}
-              className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors shadow-sm inline-flex items-center"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 mr-1.5"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              Add Patient
-            </button>
-          </div>
-        ) : (
-          !loading && (
-            <div className="mt-4">
-              <PatientTable
-                patients={patients}
-                onEdit={openEditModal}
-                onDelete={handleDeletePatient}
-              />
-            </div>
-          )
+            {loading && <p className="text-center">Loading...</p>}
+            {!loading && patients.length === 0 ? (
+              <div className="text-center py-12 border border-dashed border-gray-200 rounded-lg bg-white">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-16 w-16 mx-auto text-gray-300 mb-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1}
+                    d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"
+                  />
+                </svg>
+                <p className="text-gray-600 text-lg mb-2">No patients found</p>
+                <p className="text-gray-500 mb-6">
+                  Click the &quot;Add Patient&quot; button to create your first patient record today
+                </p>
+                <button
+                  onClick={() => setShowAddForm(true)}
+                  className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors shadow-sm inline-flex items-center"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 mr-1.5"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  Add Patient
+                </button>
+              </div>
+            ) : (
+              !loading && (
+                <div className="mt-4">
+                  <PatientTable
+                    patients={patients}
+                    onEdit={openEditModal}
+                    onDelete={handleDeletePatient}
+                  />
+                </div>
+              )
+            )}
+          </>
         )}
       </main>
 
@@ -646,7 +796,7 @@ const Patients: React.FC = () => {
             gender: selectedPatient.gender,
             phone: selectedPatient.phone,
             address: selectedPatient.address,
-            date: selectedPatient.date,
+            date: selectedPatient.date || '',
             dob: selectedPatient.dob,
             guardian: selectedPatient.guardian,
             status: selectedPatient.status,
@@ -660,7 +810,7 @@ const Patients: React.FC = () => {
       )}
 
       {showReceiptForm && selectedPatient && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold">Create Receipt for {selectedPatient.name}</h2>
@@ -687,7 +837,7 @@ const Patients: React.FC = () => {
             <ReceiptForm
               patients={patients.map((patient) => {
                 // Convert Patient to ReceiptPatient with proper type handling
-                const receiptPatient: Receipt = {
+                const receiptPatient: ReceiptPatient = {
                   id: patient.id,
                   date: patient.date || new Date().toISOString().split('T')[0],
                   patientId: patient.patientId,
@@ -724,7 +874,7 @@ const Patients: React.FC = () => {
                       AGE: String(selectedPatient.age),
                       ADDRESS: selectedPatient.address || '',
                       DOB: selectedPatient.dob || ''
-                    } as Receipt)
+                    } as ReceiptPatient)
                   : null
               }
               initialData={{
@@ -740,7 +890,7 @@ const Patients: React.FC = () => {
 
       {/* Print Options Dialog */}
       {showPrintOptions && lastCreatedReceipt && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-2xl">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold">Receipt Created Successfully</h2>
@@ -796,6 +946,13 @@ const Patients: React.FC = () => {
                 >
                   Close
                 </button>
+              </div>
+            </div>
+
+            {/* Hidden Receipt for printing */}
+            <div className="hidden">
+              <div ref={receiptRef}>
+                <ReceiptViewer report={lastCreatedReceipt as Prescription} receiptType="cash" />
               </div>
             </div>
           </div>

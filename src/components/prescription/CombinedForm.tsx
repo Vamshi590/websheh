@@ -5,6 +5,7 @@ import { supabase } from '../../SupabaseConfig'
 
 // Standard options for eye prescription fields and prescription options
 import { axisOptions, cylOptions, sphOptions, vaOptions, medicineOptions, adviceOptions, timingOptions, nearAddOptions } from '../../utils/dropdownOptions'
+import GridCombobox from '../common/GridComboBox'
 interface ReadingFormData {
     patientId: string
 
@@ -833,45 +834,49 @@ const CombinedForm = ({
                             <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
                                 <div>
                                     <label className="block text-sm md:text-xs font-medium text-gray-700">SPH</label>
-                                    <EditableCombobox
-                                        id="AR-RE-SPH"
-                                        name="AR-RE-SPH"
-                                        value={formData['AR-RE-SPH']}
-                                        options={sphOptions}
-                                        onChange={handleComboboxChange}
-                                        className="mt-1 block w-full border border-gray-300 text-black bg-white font-semibold rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                                    />
+                                    <GridCombobox
+                                    id="AR-RE-SPH"
+                                    name="AR-RE-SPH"
+                                    value={formData['AR-RE-SPH']}
+                                    options={sphOptions}
+                                    onChange={handleComboboxChange}
+                                    columnsPerRow={2}
+                                    className="mt-1 block w-full border border-gray-300 text-black bg-white font-semibold rounded-md shadow-sm py-1 px-2 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                />
                                 </div>
                                 <div>
                                     <label className="block text-sm md:text-xs font-medium text-gray-700">CYL</label>
-                                    <EditableCombobox
+                                    <GridCombobox
                                         id="AR-RE-CYL"
                                         name="AR-RE-CYL"
                                         value={formData['AR-RE-CYL']}
                                         options={cylOptions}
                                         onChange={handleComboboxChange}
+                                        columnsPerRow={2}
                                         className="mt-1 block w-full border border-gray-300 text-black bg-white font-semibold rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm md:text-xs font-medium text-gray-700">AXIS</label>
-                                    <EditableCombobox
+                                    <GridCombobox
                                         id="AR-RE-AXIS"
                                         name="AR-RE-AXIS"
                                         value={formData['AR-RE-AXIS']}
                                         options={axisOptions}
                                         onChange={handleComboboxChange}
+                                        columnsPerRow={2}
                                         className="mt-1 block w-full border border-gray-300 text-black bg-white font-semibold rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm md:text-xs font-medium text-gray-700">VA</label>
-                                    <EditableCombobox
+                                    <GridCombobox
                                         id="AR-RE-VA"
                                         name="AR-RE-VA"
                                         value={formData['AR-RE-VA']}
                                         options={vaOptions}
                                         onChange={handleComboboxChange}
+                                        columnsPerRow={2}
                                         className="mt-1 block w-full border border-gray-300 text-black bg-white font-semibold rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
@@ -882,7 +887,7 @@ const CombinedForm = ({
                                         name="AR-RE-VAC.P.H"
                                         value={formData['AR-RE-VAC.P.H']}
                                         onChange={handleChange}
-                                        className="mt-1 block w-full border border-gray-300 text-black bg-white font-semibold rounded-md shadow-sm py-3 md:py-2 px-3 md:px-2 text-base md:text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                        className="mt-1 block w-full border border-gray-300 text-black bg-white font-semibold rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
                             </div>
@@ -894,45 +899,49 @@ const CombinedForm = ({
                             <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
                                 <div>
                                     <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">SPH</label>
-                                    <EditableCombobox
+                                    <GridCombobox
                                         id="AR-LE-SPH"
                                         name="AR-LE-SPH"
                                         value={formData['AR-LE-SPH']}
                                         options={sphOptions}
                                         onChange={handleComboboxChange}
+                                        columnsPerRow={2}
                                         className="mt-1 block w-full border border-gray-300 text-black bg-white font-semibold rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">CYL</label>
-                                    <EditableCombobox
+                                    <GridCombobox
                                         id="AR-LE-CYL"
                                         name="AR-LE-CYL"
                                         value={formData['AR-LE-CYL']}
                                         options={cylOptions}
                                         onChange={handleComboboxChange}
+                                        columnsPerRow={2}
                                         className="mt-1 block w-full border border-gray-300 text-black bg-white font-semibold rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">AXIS</label>
-                                    <EditableCombobox
+                                    <GridCombobox
                                         id="AR-LE-AXIS"
                                         name="AR-LE-AXIS"
                                         value={formData['AR-LE-AXIS']}
                                         options={axisOptions}
                                         onChange={handleComboboxChange}
+                                        columnsPerRow={2}
                                         className="mt-1 block w-full border border-gray-300 text-black bg-white font-semibold rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">VA</label>
-                                    <EditableCombobox
+                                    <GridCombobox
                                         id="AR-LE-VA"
                                         name="AR-LE-VA"
                                         value={formData['AR-LE-VA']}
                                         options={vaOptions}
                                         onChange={handleComboboxChange}
+                                        columnsPerRow={2}
                                         className="mt-1 block w-full border border-gray-300 text-black bg-white font-semibold rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
@@ -943,7 +952,7 @@ const CombinedForm = ({
                                         name="AR-LE-VAC.P.H"
                                         value={formData['AR-LE-VAC.P.H']}
                                         onChange={handleChange}
-                                        className="mt-1 block w-full border border-gray-300 text-black bg-white font-semibold rounded-md shadow-sm py-3 md:py-2 px-3 md:px-2 text-base md:text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                        className="mt-1 block w-full border border-gray-300 text-black bg-white font-semibold rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
                             </div>
@@ -971,45 +980,49 @@ const CombinedForm = ({
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                                 <div>
                                     <label className="block text-sm md:text-xs font-medium text-gray-700">SPH</label>
-                                    <EditableCombobox
+                                    <GridCombobox
                                         id="SR-RE-D-SPH"
                                         name="SR-RE-D-SPH"
                                         value={formData['SR-RE-D-SPH']}
                                         options={sphOptions}
                                         onChange={handleComboboxChange}
+                                        columnsPerRow={2}
                                         className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm md:text-xs font-medium text-gray-700">CYL</label>
-                                    <EditableCombobox
+                                    <GridCombobox
                                         id="SR-RE-D-CYL"
                                         name="SR-RE-D-CYL"
                                         value={formData['SR-RE-D-CYL']}
                                         options={cylOptions}
                                         onChange={handleComboboxChange}
+                                        columnsPerRow={2}
                                         className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm md:text-xs font-medium text-gray-700">AXIS</label>
-                                    <EditableCombobox
+                                    <GridCombobox
                                         id="SR-RE-D-AXIS"
                                         name="SR-RE-D-AXIS"
                                         value={formData['SR-RE-D-AXIS']}
                                         options={axisOptions}
                                         onChange={handleComboboxChange}
+                                        columnsPerRow={2}
                                         className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm md:text-xs font-medium text-gray-700">VA</label>
-                                    <EditableCombobox
+                                    <GridCombobox
                                         id="SR-RE-D-VA"
                                         name="SR-RE-D-VA"
                                         value={formData['SR-RE-D-VA']}
                                         options={vaOptions}
                                         onChange={handleComboboxChange}
+                                        columnsPerRow={2}
                                         className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
@@ -1022,45 +1035,49 @@ const CombinedForm = ({
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                                 <div>
                                     <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">SPH</label>
-                                    <EditableCombobox
+                                    <GridCombobox
                                         id="SR-RE-N-SPH"
                                         name="SR-RE-N-SPH"
                                         value={formData['SR-RE-N-SPH']}
                                         options={nearAddOptions}
                                         onChange={handleComboboxChange}
+                                        columnsPerRow={2}
                                         className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">CYL</label>
-                                    <EditableCombobox
+                                    <GridCombobox
                                         id="SR-RE-N-CYL"
                                         name="SR-RE-N-CYL"
                                         value={formData['SR-RE-N-CYL']}
                                         options={cylOptions}
                                         onChange={handleComboboxChange}
+                                        columnsPerRow={2}
                                         className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">AXIS</label>
-                                    <EditableCombobox
+                                    <GridCombobox
                                         id="SR-RE-N-AXIS"
                                         name="SR-RE-N-AXIS"
                                         value={formData['SR-RE-N-AXIS']}
                                         options={axisOptions}
                                         onChange={handleComboboxChange}
+                                        columnsPerRow={2}
                                         className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">VA</label>
-                                    <EditableCombobox
+                                    <GridCombobox
                                         id="SR-RE-N-VA"
                                         name="SR-RE-N-VA"
                                         value={formData['SR-RE-N-VA']}
                                         options={vaOptions}
                                         onChange={handleComboboxChange}
+                                        columnsPerRow={2}
                                         className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
@@ -1073,45 +1090,49 @@ const CombinedForm = ({
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                                 <div>
                                     <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">SPH</label>
-                                    <EditableCombobox
+                                    <GridCombobox
                                         id="SR-LE-D-SPH"
                                         name="SR-LE-D-SPH"
                                         value={formData['SR-LE-D-SPH']}
                                         options={sphOptions}
                                         onChange={handleComboboxChange}
+                                        columnsPerRow={2}
                                         className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">CYL</label>
-                                    <EditableCombobox
+                                    <GridCombobox
                                         id="SR-LE-D-CYL"
                                         name="SR-LE-D-CYL"
                                         value={formData['SR-LE-D-CYL']}
                                         options={cylOptions}
                                         onChange={handleComboboxChange}
+                                        columnsPerRow={2}
                                         className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">AXIS</label>
-                                    <EditableCombobox
+                                    <GridCombobox
                                         id="SR-LE-D-AXIS"
                                         name="SR-LE-D-AXIS"
                                         value={formData['SR-LE-D-AXIS']}
                                         options={axisOptions}
                                         onChange={handleComboboxChange}
+                                        columnsPerRow={2}
                                         className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">BCVA</label>
-                                    <EditableCombobox
+                                    <GridCombobox
                                         id="SR-LE-D-BCVA"
                                         name="SR-LE-D-BCVA"
                                         value={formData['SR-LE-D-BCVA']}
                                         options={vaOptions}
                                         onChange={handleComboboxChange}
+                                        columnsPerRow={2}
                                         className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
@@ -1124,45 +1145,49 @@ const CombinedForm = ({
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                                 <div>
                                     <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">SPH</label>
-                                    <EditableCombobox
+                                    <GridCombobox
                                         id="SR-LE-N-SPH"
                                         name="SR-LE-N-SPH"
                                         value={formData['SR-LE-N-SPH']}
                                         options={nearAddOptions}
                                         onChange={handleComboboxChange}
+                                        columnsPerRow={2}
                                         className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">CYL</label>
-                                    <EditableCombobox
+                                    <GridCombobox
                                         id="SR-LE-N-CYL"
                                         name="SR-LE-N-CYL"
                                         value={formData['SR-LE-N-CYL']}
                                         options={cylOptions}
                                         onChange={handleComboboxChange}
+                                        columnsPerRow={2}
                                         className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">AXIS</label>
-                                    <EditableCombobox
+                                    <GridCombobox
                                         id="SR-LE-N-AXIS"
                                         name="SR-LE-N-AXIS"
                                         value={formData['SR-LE-N-AXIS']}
                                         options={axisOptions}
                                         onChange={handleComboboxChange}
+                                        columnsPerRow={2}
                                         className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">BCVA</label>
-                                    <EditableCombobox
+                                    <GridCombobox
                                         id="SR-LE-N-BCVA"
                                         name="SR-LE-N-BCVA"
                                         value={formData['SR-LE-N-BCVA']}
                                         options={vaOptions}
                                         onChange={handleComboboxChange}
+                                        columnsPerRow={2}
                                         className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
@@ -1229,45 +1254,49 @@ const CombinedForm = ({
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                                 <div>
                                     <label className="block text-sm md:text-xs font-medium text-gray-700">SPH</label>
-                                    <EditableCombobox
+                                    <GridCombobox
                                         id="GR-RE-D-SPH"
                                         name="GR-RE-D-SPH"
                                         value={formData['GR-RE-D-SPH']}
                                         options={sphOptions}
                                         onChange={handleComboboxChange}
+                                        columnsPerRow={2}
                                         className="mt-1 block w-full border border-gray-300 text-black bg-white font-semibold rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm md:text-xs font-medium text-gray-700">CYL</label>
-                                    <EditableCombobox
+                                    <GridCombobox
                                         id="GR-RE-D-CYL"
                                         name="GR-RE-D-CYL"
                                         value={formData['GR-RE-D-CYL']}
                                         options={cylOptions}
                                         onChange={handleComboboxChange}
+                                        columnsPerRow={2}
                                         className="mt-1 block w-full border border-gray-300 text-black bg-white font-semibold rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm md:text-xs font-medium text-gray-700">AXIS</label>
-                                    <EditableCombobox
+                                    <GridCombobox
                                         id="GR-RE-D-AXIS"
                                         name="GR-RE-D-AXIS"
                                         value={formData['GR-RE-D-AXIS']}
                                         options={axisOptions}
                                         onChange={handleComboboxChange}
+                                        columnsPerRow={2}
                                         className="mt-1 block w-full border border-gray-300 text-black bg-white font-semibold rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm md:text-xs font-medium text-gray-700">VISION</label>
-                                    <EditableCombobox
+                                    <GridCombobox
                                         id="GR-RE-D-VISION"
                                         name="GR-RE-D-VISION"
                                         value={formData['GR-RE-D-VISION']}
                                         options={vaOptions}
                                         onChange={handleComboboxChange}
+                                        columnsPerRow={2}
                                         className="mt-1 block w-full border border-gray-300 text-black bg-white font-semibold rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
@@ -1280,45 +1309,49 @@ const CombinedForm = ({
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                                 <div>
                                     <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">SPH</label>
-                                    <EditableCombobox
+                                    <GridCombobox
                                         id="GR-RE-N-SPH"
                                         name="GR-RE-N-SPH"
                                         value={formData['GR-RE-N-SPH']}
                                         options={sphOptions}
                                         onChange={handleComboboxChange}
+                                        columnsPerRow={2}
                                         className="mt-1 block w-full border border-gray-300 text-black bg-white font-semibold rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">CYL</label>
-                                    <EditableCombobox
+                                    <GridCombobox
                                         id="GR-RE-N-CYL"
                                         name="GR-RE-N-CYL"
                                         value={formData['GR-RE-N-CYL']}
                                         options={cylOptions}
                                         onChange={handleComboboxChange}
+                                        columnsPerRow={2}
                                         className="mt-1 block w-full border border-gray-300 text-black bg-white font-semibold rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">AXIS</label>
-                                    <EditableCombobox
+                                    <GridCombobox
                                         id="GR-RE-N-AXIS"
                                         name="GR-RE-N-AXIS"
                                         value={formData['GR-RE-N-AXIS']}
                                         options={axisOptions}
                                         onChange={handleComboboxChange}
+                                        columnsPerRow={2}
                                         className="mt-1 block w-full border border-gray-300 text-black bg-white font-semibold rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">VISION</label>
-                                    <EditableCombobox
+                                    <GridCombobox
                                         id="GR-RE-N-VISION"
                                         name="GR-RE-N-VISION"
                                         value={formData['GR-RE-N-VISION']}
                                         options={vaOptions}
                                         onChange={handleComboboxChange}
+                                        columnsPerRow={2}
                                         className="mt-1 block w-full border border-gray-300 text-black bg-white font-semibold rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
@@ -1331,45 +1364,49 @@ const CombinedForm = ({
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                                 <div>
                                     <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">SPH</label>
-                                    <EditableCombobox
+                                    <GridCombobox
                                         id="GR-LE-D-SPH"
                                         name="GR-LE-D-SPH"
                                         value={formData['GR-LE-D-SPH']}
                                         options={sphOptions}
                                         onChange={handleComboboxChange}
+                                        columnsPerRow={2}
                                         className="mt-1 block w-full border border-gray-300 text-black bg-white font-semibold rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">CYL</label>
-                                    <EditableCombobox
+                                    <GridCombobox
                                         id="GR-LE-D-CYL"
                                         name="GR-LE-D-CYL"
                                         value={formData['GR-LE-D-CYL']}
                                         options={cylOptions}
                                         onChange={handleComboboxChange}
+                                        columnsPerRow={2}
                                         className="mt-1 block w-full border border-gray-300 text-black bg-white font-semibold rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">AXIS</label>
-                                    <EditableCombobox
+                                    <GridCombobox
                                         id="GR-LE-D-AXIS"
                                         name="GR-LE-D-AXIS"
                                         value={formData['GR-LE-D-AXIS']}
                                         options={axisOptions}
                                         onChange={handleComboboxChange}
+                                        columnsPerRow={2}
                                         className="mt-1 block w-full border border-gray-300 text-black bg-white font-semibold rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">VISION</label>
-                                    <EditableCombobox
+                                    <GridCombobox
                                         id="GR-LE-D-VISION"
                                         name="GR-LE-D-VISION"
                                         value={formData['GR-LE-D-VISION']}
                                         options={vaOptions}
                                         onChange={handleComboboxChange}
+                                        columnsPerRow={2}
                                         className="mt-1 block w-full border border-gray-300 text-black bg-white font-semibold rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
@@ -1382,45 +1419,49 @@ const CombinedForm = ({
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                                 <div>
                                     <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">SPH</label>
-                                    <EditableCombobox
+                                    <GridCombobox
                                         id="GR-LE-N-SPH"
                                         name="GR-LE-N-SPH"
                                         value={formData['GR-LE-N-SPH']}
                                         options={sphOptions}
                                         onChange={handleComboboxChange}
+                                        columnsPerRow={2}
                                         className="mt-1 block w-full border border-gray-300 text-black bg-white font-semibold rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">CYL</label>
-                                    <EditableCombobox
+                                    <GridCombobox
                                         id="GR-LE-N-CYL"
                                         name="GR-LE-N-CYL"
                                         value={formData['GR-LE-N-CYL']}
                                         options={cylOptions}
                                         onChange={handleComboboxChange}
+                                        columnsPerRow={2}
                                         className="mt-1 block w-full border border-gray-300 text-black bg-white font-semibold rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">AXIS</label>
-                                    <EditableCombobox
+                                    <GridCombobox
                                         id="GR-LE-N-AXIS"
                                         name="GR-LE-N-AXIS"
                                         value={formData['GR-LE-N-AXIS']}
                                         options={axisOptions}
                                         onChange={handleComboboxChange}
+                                        columnsPerRow={2}
                                         className="mt-1 block w-full border border-gray-300 text-black bg-white font-semibold rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">VISION</label>
-                                    <EditableCombobox
+                                    <GridCombobox
                                         id="GR-LE-N-VISION"
                                         name="GR-LE-N-VISION"
                                         value={formData['GR-LE-N-VISION']}
                                         options={vaOptions}
                                         onChange={handleComboboxChange}
+                                        columnsPerRow={2}
                                         className="mt-1 block w-full border border-gray-300 text-black bg-white font-semibold rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
@@ -1440,45 +1481,49 @@ const CombinedForm = ({
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                                 <div>
                                     <label className="block text-sm md:text-xs font-medium text-gray-700">SPH</label>
-                                    <EditableCombobox
+                                    <GridCombobox
                                         id="PGP-RE-D-SPH"
                                         name="PGP-RE-D-SPH"
                                         value={formData['PGP-RE-D-SPH']}
                                         options={sphOptions}
                                         onChange={handleComboboxChange}
+                                        columnsPerRow={2}
                                         className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm md:text-xs font-medium text-gray-700">CYL</label>
-                                    <EditableCombobox
+                                    <GridCombobox
                                         id="PGP-RE-D-CYL"
                                         name="PGP-RE-D-CYL"
                                         value={formData['PGP-RE-D-CYL']}
                                         options={cylOptions}
                                         onChange={handleComboboxChange}
+                                        columnsPerRow={2}
                                         className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm md:text-xs font-medium text-gray-700">AXIS</label>
-                                    <EditableCombobox
+                                    <GridCombobox
                                         id="PGP-RE-D-AXIS"
                                         name="PGP-RE-D-AXIS"
                                         value={formData['PGP-RE-D-AXIS']}
                                         options={axisOptions}
                                         onChange={handleComboboxChange}
+                                        columnsPerRow={2}
                                         className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm md:text-xs font-medium text-gray-700">VA</label>
-                                    <EditableCombobox
+                                    <GridCombobox
                                         id="PGP-RE-D-VA"
                                         name="PGP-RE-D-VA"
                                         value={formData['PGP-RE-D-VA']}
                                         options={vaOptions}
                                         onChange={handleComboboxChange}
+                                        columnsPerRow={2}
                                         className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
@@ -1491,45 +1536,49 @@ const CombinedForm = ({
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                                 <div>
                                     <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">SPH</label>
-                                    <EditableCombobox
+                                    <GridCombobox
                                         id="PGP-RE-N-SPH"
                                         name="PGP-RE-N-SPH"
                                         value={formData['PGP-RE-N-SPH']}
                                         options={sphOptions}
                                         onChange={handleComboboxChange}
+                                        columnsPerRow={2}
                                         className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">CYL</label>
-                                    <EditableCombobox
+                                    <GridCombobox
                                         id="PGP-RE-N-CYL"
                                         name="PGP-RE-N-CYL"
                                         value={formData['PGP-RE-N-CYL']}
                                         options={cylOptions}
                                         onChange={handleComboboxChange}
+                                        columnsPerRow={2}
                                         className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">AXIS</label>
-                                    <EditableCombobox
+                                    <GridCombobox
                                         id="PGP-RE-N-AXIS"
                                         name="PGP-RE-N-AXIS"
                                         value={formData['PGP-RE-N-AXIS']}
                                         options={axisOptions}
                                         onChange={handleComboboxChange}
+                                        columnsPerRow={2}
                                         className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">VA</label>
-                                    <EditableCombobox
+                                    <GridCombobox
                                         id="PGP-RE-N-VA"
                                         name="PGP-RE-N-VA"
                                         value={formData['PGP-RE-N-VA']}
                                         options={vaOptions}
                                         onChange={handleComboboxChange}
+                                        columnsPerRow={2}
                                         className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
@@ -1542,45 +1591,49 @@ const CombinedForm = ({
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                                 <div>
                                     <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">SPH</label>
-                                    <EditableCombobox
+                                    <GridCombobox
                                         id="PGP-LE-D-SPH"
                                         name="PGP-LE-D-SPH"
                                         value={formData['PGP-LE-D-SPH']}
                                         options={sphOptions}
                                         onChange={handleComboboxChange}
+                                        columnsPerRow={2}
                                         className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">CYL</label>
-                                    <EditableCombobox
+                                    <GridCombobox
                                         id="PGP-LE-D-CYL"
                                         name="PGP-LE-D-CYL"
                                         value={formData['PGP-LE-D-CYL']}
                                         options={cylOptions}
                                         onChange={handleComboboxChange}
+                                        columnsPerRow={2}
                                         className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">AXIS</label>
-                                    <EditableCombobox
+                                    <GridCombobox
                                         id="PGP-LE-D-AXIS"
                                         name="PGP-LE-D-AXIS"
                                         value={formData['PGP-LE-D-AXIS']}
                                         options={axisOptions}
                                         onChange={handleComboboxChange}
+                                        columnsPerRow={2}
                                         className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">BCVA</label>
-                                    <EditableCombobox
+                                    <GridCombobox
                                         id="PGP-LE-D-BCVA"
                                         name="PGP-LE-D-BCVA"
                                         value={formData['PGP-LE-D-BCVA']}
                                         options={vaOptions}
                                         onChange={handleComboboxChange}
+                                        columnsPerRow={2}
                                         className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
@@ -1593,46 +1646,50 @@ const CombinedForm = ({
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                                 <div>
                                     <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">SPH</label>
-                                    <EditableCombobox
+                                    <GridCombobox
                                         id="PGP-LE-N-SPH"
                                         name="PGP-LE-N-SPH"
                                         value={formData['PGP-LE-N-SPH']}
                                         options={sphOptions}
                                         onChange={handleComboboxChange}
+                                        columnsPerRow={2}
                                         className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">CYL</label>
-                                    <EditableCombobox
+                                    <GridCombobox
                                         id="PGP-LE-N-CYL"
                                         name="PGP-LE-N-CYL"
                                         value={formData['PGP-LE-N-CYL']}
                                         options={cylOptions}
                                         onChange={handleComboboxChange}
+                                        columnsPerRow={2}
                                         className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">AXIS</label>
-                                    <EditableCombobox
+                                    <GridCombobox
                                         id="PGP-LE-N-AXIS"
                                         name="PGP-LE-N-AXIS"
                                         value={formData['PGP-LE-N-AXIS']}
                                         options={axisOptions}
                                         onChange={handleComboboxChange}
+                                        columnsPerRow={2}
                                         className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm md:text-xs font-medium text-gray-700 md:hidden">BCVA</label>
-                                    <EditableCombobox
+                                    <GridCombobox
                                         id="PGP-LE-N-BCVA"
                                         name="PGP-LE-N-BCVA"
                                         value={formData['PGP-LE-N-BCVA']}
                                         options={vaOptions}
                                         onChange={handleComboboxChange}
-                                        className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                        columnsPerRow={2}
+                                        className="mt-1 block w-full border border-gray-300 bg-white rounded-md shadow-sm py-2 md:py-1 px-3 md:px-2 text-base md:text-md font-semibold focus:outline-none focus:ring-blue-500 focus:border-blue-500"        
                                     />
                                 </div>
                             </div>

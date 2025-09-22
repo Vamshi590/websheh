@@ -7,6 +7,9 @@ import {
 } from '../../utils/dropdownOptions'
 import EditableCombobox from '../common/EditableCombobox'
 import { toast } from 'sonner'
+import { format } from 'date-fns'
+import { toZonedTime } from 'date-fns-tz'
+import { getLatestPatientId, getPatientById } from './api'
 
 // Standardized API response format
 interface StandardizedResponse<T> {
@@ -77,7 +80,7 @@ const PatientForm: React.FC<PatientFormProps> = ({
   // This section intentionally left empty as the ExtendedFormData interface is now defined at the top level
 
   const [formData, setFormData] = useState<ExtendedFormData>({
-    date: initialValues?.date || String(new Date().toISOString().split('T')[0]),
+    date: initialValues?.date || format(toZonedTime(new Date(), 'Asia/Kolkata'), 'yyyy-MM-dd'),
     patientId: initialValues?.patientId || '',
     name: initialValues?.name || '',
     guardian: initialValues?.guardian || '',
@@ -95,34 +98,13 @@ const PatientForm: React.FC<PatientFormProps> = ({
     ...(initialValues?.id ? { id: initialValues.id } : {})
   })
 
-  // Dynamic dropdown options state - fetched from backend
-  const [dynamicDoctorOptions, setDynamicDoctorOptions] = useState<string[]>([])
-  const [dynamicDepartmentOptions, setDynamicDepartmentOptions] = useState<string[]>([])
-  const [dynamicReferredByOptions, setDynamicReferredByOptions] = useState<string[]>([])
-
-  // Load dropdown options on component mount
-  useEffect(() => {
-    const loadDropdownOptions = async (): Promise<void> => {
-      const [doctorOpts, departmentOpts, referredByOpts] = await Promise.all([
-        fetchDropdownOptions('doctorName'),
-        fetchDropdownOptions('department'),
-        fetchDropdownOptions('referredBy')
-      ])
-      setDynamicDoctorOptions(doctorOpts)
-      setDynamicDepartmentOptions(departmentOpts)
-      setDynamicReferredByOptions(referredByOpts)
-    }
-    loadDropdownOptions()
-  }, [])
-
   // Function to fetch the latest patient ID and generate the next one
   const fetchLatestPatientId = async (force = false): Promise<void> => {
     try {
       // Only proceed if we're not in edit mode and either we don't have a patient ID yet or force is true
       if ((!initialValues && !formData.patientId && !isExistingPatientMode) || force) {
         // Get the patient count directly from the backend (more efficient)
-        const api = window.api as Record<string, (...args: unknown[]) => Promise<unknown>>
-        const response = (await api.getLatestPatientId()) as {
+        const response = (await getLatestPatientId()) as {
           success: boolean
           data: number
           message: string
@@ -139,7 +121,7 @@ const PatientForm: React.FC<PatientFormProps> = ({
             const nextId = String(nextNumericId).padStart(4, '0')
 
             // Check if this ID already exists
-            const checkResponse = (await api.getPatientById(nextId)) as {
+            const checkResponse = (await getPatientById(nextId)) as {
               success: boolean
               data: unknown | null
               message: string
@@ -180,74 +162,6 @@ const PatientForm: React.FC<PatientFormProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialValues, formData.patientId, isExistingPatientMode, patientCount])
 
-  // Helper function to fetch dropdown options from backend
-  const fetchDropdownOptions = async (fieldName: string): Promise<string[]> => {
-    try {
-      const api = window.api as Record<string, (...args: unknown[]) => Promise<unknown>>
-      const result = (await api.getDropdownOptions(fieldName)) as {
-        success: boolean
-        options?: string[]
-        error?: string
-      }
-      if (result.success && result.options) {
-        return result.options
-      } else {
-        console.warn(`Failed to fetch ${fieldName} options:`, result.error)
-        // Return fallback options from static imports
-        switch (fieldName) {
-          case 'doctorName':
-            return doctorOptions
-          case 'department':
-            return departmentOptions
-          case 'referredBy':
-            return referredByOptions
-          default:
-            return []
-        }
-      }
-    } catch (error) {
-      console.error(`Error fetching ${fieldName} options:`, error)
-      // Return fallback options from static imports
-      switch (fieldName) {
-        case 'doctorName':
-          return doctorOptions
-        case 'department':
-          return departmentOptions
-        case 'referredBy':
-          return referredByOptions
-        default:
-          return []
-      }
-    }
-  }
-
-  // Helper function to add new option permanently and refresh options
-  const addNewOptionPermanently = async (fieldName: string, value: string): Promise<void> => {
-    if (!value.trim()) return
-
-    try {
-      const api = window.api as Record<string, (...args: unknown[]) => Promise<unknown>>
-      const result = await api.addDropdownOption(fieldName, value)
-      if (result) {
-        console.log(`Added '${value}' to ${fieldName} options permanently`)
-        // Refresh the options from backend to get the updated list
-        const updatedOptions = await fetchDropdownOptions(fieldName)
-        switch (fieldName) {
-          case 'doctorName':
-            setDynamicDoctorOptions(updatedOptions)
-            break
-          case 'department':
-            setDynamicDepartmentOptions(updatedOptions)
-            break
-          case 'referredBy':
-            setDynamicReferredByOptions(updatedOptions)
-            break
-        }
-      }
-    } catch (error) {
-      console.error('Error adding dropdown option:', error)
-    }
-  }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
     const { name, value } = e.target
@@ -326,39 +240,39 @@ const PatientForm: React.FC<PatientFormProps> = ({
     }
   }
 
-  const handleExistingPatientClick = (): void => {
-    const newMode = !isExistingPatientMode
-    setIsExistingPatientMode(newMode)
+  // const handleExistingPatientClick = (): void => {
+  //   const newMode = !isExistingPatientMode
+  //   setIsExistingPatientMode(newMode)
 
-    if (newMode) {
-      // Entering existing patient mode - reset search
-      setSearchPatientId('')
-      setSearchedPatient(null)
-    } else {
-      // Switching back to new patient mode - reset form data
-      setSearchedPatient(null)
-      setFormData({
-        date: String(new Date().toISOString().split('T')[0]),
-        patientId: '',
-        name: '',
-        guardian: '',
-        dob: '',
-        age: 0,
-        gender: 'Male',
-        phone: '',
-        address: '',
-        status: 'New',
-        doctorName: 'Dr. Srilatha ch',
-        department: 'Opthalmology',
-        referredBy: 'Self',
-        createdBy: getCurrentUser()
-      })
+  //   if (newMode) {
+  //     // Entering existing patient mode - reset search
+  //     setSearchPatientId('')
+  //     setSearchedPatient(null)
+  //   } else {
+  //     // Switching back to new patient mode - reset form data
+  //     setSearchedPatient(null)
+  //     setFormData({
+  //       date: String(new Date().toISOString().split('T')[0]),
+  //       patientId: '',
+  //       name: '',
+  //       guardian: '',
+  //       dob: '',
+  //       age: 0,
+  //       gender: 'Male',
+  //       phone: '',
+  //       address: '',
+  //       status: 'New',
+  //       doctorName: 'Dr. Srilatha ch',
+  //       department: 'Opthalmology',
+  //       referredBy: 'Self',
+  //       createdBy: getCurrentUser()
+  //     })
 
-      // Re-fetch latest patient ID for the new patient
-      // Force parameter ensures it runs even if conditions wouldn't normally allow it
-      fetchLatestPatientId(true)
-    }
-  }
+  //     // Re-fetch latest patient ID for the new patient
+  //     // Force parameter ensures it runs even if conditions wouldn't normally allow it
+  //     fetchLatestPatientId(true)
+  //   }
+  // }
 
   const handleSearchPatient = async (): Promise<void> => {
     if (!searchPatientId.trim()) {
@@ -369,8 +283,7 @@ const PatientForm: React.FC<PatientFormProps> = ({
     setIsSearching(true)
     try {
       // Call the main process to search for patient
-      const api = window.api as Record<string, (...args: unknown[]) => Promise<unknown>>
-      const response = await api.getPatientById(searchPatientId)
+      const response = await getPatientById(searchPatientId)
 
       // Handle standardized response format
       if (response && typeof response === 'object') {
@@ -479,16 +392,20 @@ const PatientForm: React.FC<PatientFormProps> = ({
           : ({ ...submissionData, id: submissionData.id || String(Date.now()) } as Patient)
 
       // Call onCreateReceipt if provided (for new patients)
+      // This is the ONLY place where we should trigger receipt creation for new patients
       if (onCreateReceipt && patientData && !isExistingPatientMode) {
         onCreateReceipt(patientData)
       }
 
-      // Show success message
-      toast.success(
-        isExistingPatientMode && searchedPatient
-          ? `Patient ${patientData.name} updated successfully`
-          : `Patient ${patientData.name} added successfully`
-      )
+      // Only show success message for new patients or when in existing patient mode
+      // For updates (when initialValues is provided), we'll let the parent component handle the success message
+      if (!initialValues) {
+        toast.success(
+          isExistingPatientMode && searchedPatient
+            ? `Patient ${patientData.name} updated successfully`
+            : `Patient ${patientData.name} added successfully`
+        )
+      }
 
       // Reset form if not in existing patient mode or not editing
       if (!isExistingPatientMode && !initialValues) {
@@ -533,7 +450,7 @@ const PatientForm: React.FC<PatientFormProps> = ({
         </div>
       )}
       <div className="bg-gray-50 p-4 rounded-md border border-gray-200 mb-4">
-        <div className="flex justify-between items-center mb-4">
+        {/* <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-medium text-gray-900">Patient Information</h3>
           <p
             className="text-sm text-gray-600 underline cursor-pointer hover:text-blue-600"
@@ -541,7 +458,7 @@ const PatientForm: React.FC<PatientFormProps> = ({
           >
             {isExistingPatientMode ? 'new patient' : 'existing patient'}
           </p>
-        </div>
+        </div> */}
 
         {/* Search Interface for Existing Patient */}
         {isExistingPatientMode && (
@@ -784,9 +701,8 @@ const PatientForm: React.FC<PatientFormProps> = ({
               id="doctorName"
               name="doctorName"
               value={formData.doctorName}
-              options={dynamicDoctorOptions}
+              options={doctorOptions}
               onChange={handleChange}
-              onAddNewOption={addNewOptionPermanently}
               placeholder="Select or type doctor name..."
               className="bg-white"
               required
@@ -801,9 +717,8 @@ const PatientForm: React.FC<PatientFormProps> = ({
               id="department"
               name="department"
               value={formData.department}
-              options={dynamicDepartmentOptions}
+              options={departmentOptions}
               onChange={handleChange}
-              onAddNewOption={addNewOptionPermanently}
               placeholder="Select or type department..."
               className="bg-white"
             />
@@ -817,9 +732,8 @@ const PatientForm: React.FC<PatientFormProps> = ({
               id="referredBy"
               name="referredBy"
               value={formData.referredBy}
-              options={dynamicReferredByOptions}
+              options={referredByOptions}
               onChange={handleChange}
-              onAddNewOption={addNewOptionPermanently}
               placeholder="Select or type referrer..."
               className="bg-white"
             />

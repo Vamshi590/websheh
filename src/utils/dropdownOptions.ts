@@ -55,11 +55,8 @@ export const departmentOptions = [
   
   export const doctorOptions = [
     'Dr. Srilatha ch',
-    'Dr. Sheh',
-    'Dr. Ravi Kumar',
-    'Dr. Priya Sharma',
-    'Dr. Anand Reddy',
-    'Dr. Meena Patel'
+    'Dr. Ekta Agarwal',
+    'Dr. Praneetha A'
   ]
   
   export const statusOptions = ['Regular', 'Follow Up', 'Emergency']

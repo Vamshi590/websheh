@@ -1,102 +1,31 @@
 import React, { useState } from 'react'
+import { type InPatient } from '../../pages/Inpatients'
 
-interface Patient {
-  id: string
-  date?: string
-  patientId: string
-  name: string
-  guardian: string
-  dob: string
-  age: number | string
-  gender: string
-  phone: string
-  address: string
-  referredBy?: string
-}
-
-interface PatientTableProps {
-  patients: Patient[]
-  onEdit: (patient: Patient) => void
+interface InPatientTableProps {
+  inpatients: InPatient[]
+  onEdit: (inpatient: InPatient) => void
   onDelete: (id: string) => void
 }
 
-const PatientTable = ({ patients, onEdit, onDelete }: PatientTableProps): React.JSX.Element => {
+const InPatientTable: React.FC<InPatientTableProps> = ({ inpatients, onEdit, onDelete }) => {
   const [searchTerm, setSearchTerm] = useState('')
-  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null)
+  const [selectedInPatient, setSelectedInPatient] = useState<InPatient | null>(null)
 
-  // Group patients by date and assign sequential token numbers
-  const patientTokenMap = new Map<string, Map<string, number>>()
-
-  // Process all patients to create token numbers by day
-  const assignTokenNumbers = (): void => {
-    // Clear previous mappings
-    patientTokenMap.clear()
-
-    // Group patients by date (without time)
-    patients.forEach((patient) => {
-      if (!patient.date) return
-
-      // Extract just the date part (DD-MM-YYYY)
-      const datePart = patient.date.split(' ')[0]
-
-      if (!patientTokenMap.has(datePart)) {
-        patientTokenMap.set(datePart, new Map<string, number>())
-      }
-
-      const dayMap = patientTokenMap.get(datePart)!
-      // Store the patient ID with the time for sorting
-      const timeMatch = patient.date.match(/(\d{2}):(\d{2})$/)
-      const timeValue = timeMatch ? parseInt(timeMatch[1], 10) * 60 + parseInt(timeMatch[2], 10) : 0
-
-      dayMap.set(patient.id, timeValue)
-    })
-
-    // Sort patients by time and assign sequential numbers
-    patientTokenMap.forEach((dayMap, date) => {
-      // Sort patients by their time values
-      const sortedEntries = [...dayMap.entries()].sort((a, b) => a[1] - b[1])
-
-      // Assign sequential token numbers starting from 1
-      const tokenMap = new Map<string, number>()
-      sortedEntries.forEach((entry, index) => {
-        tokenMap.set(entry[0], index + 1)
-      })
-
-      // Replace time values with token numbers
-      patientTokenMap.set(date, tokenMap)
-    })
-  }
-
-  // Call once to initialize token numbers
-  assignTokenNumbers()
-
-  // Function to get token number for a patient
-  const getTokenNumber = (patient: Patient): string => {
-    if (!patient.date) return '-'
-
-    // Extract just the date part
-    const datePart = patient.date.split(' ')[0]
-
-    if (!patientTokenMap.has(datePart)) return '-'
-
-    const dayMap = patientTokenMap.get(datePart)!
-    return dayMap.has(patient.id) ? String(dayMap.get(patient.id)) : '-'
-  }
-
-  // Filter patients based on search term
-  const filteredPatients = searchTerm
-    ? patients.filter((patient) => {
+  // Filter inpatients based on search term
+  const filteredInpatients = searchTerm
+    ? inpatients.filter((inpatient) => {
         return (
-          patient.patientId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          patient.guardian.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          patient.phone.toLowerCase().includes(searchTerm.toLowerCase())
+          inpatient.patientId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          inpatient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          inpatient.guardianName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          inpatient.phone.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          inpatient.operationName.toLowerCase().includes(searchTerm.toLowerCase())
         )
       })
-    : patients
+    : inpatients
 
-  const handleRowClick = (patient: Patient): void => {
-    setSelectedPatient(patient.id === selectedPatient?.id ? null : patient)
+  const handleRowClick = (inpatient: InPatient): void => {
+    setSelectedInPatient(inpatient.id === selectedInPatient?.id ? null : inpatient)
   }
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>): void => {
@@ -104,6 +33,16 @@ const PatientTable = ({ patients, onEdit, onDelete }: PatientTableProps): React.
   }
 
   const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}')
+
+  // Format currency
+  const formatCurrency = (amount: number): string => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount)
+  }
 
   return (
     <div className="space-y-4 bg-white rounded-lg p-4">
@@ -126,7 +65,7 @@ const PatientTable = ({ patients, onEdit, onDelete }: PatientTableProps): React.
           </div>
           <input
             type="text"
-            placeholder="Search patients..."
+            placeholder="Search in-patients..."
             className="pl-10 pr-4 py-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             value={searchTerm}
             onChange={handleSearch}
@@ -134,10 +73,10 @@ const PatientTable = ({ patients, onEdit, onDelete }: PatientTableProps): React.
         </div>
 
         <div className="flex space-x-2">
-          {selectedPatient ? (
+          {selectedInPatient ? (
             <>
               <button
-                onClick={() => onEdit(selectedPatient)}
+                onClick={() => onEdit(selectedInPatient)}
                 className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors shadow-sm flex items-center space-x-1"
               >
                 <svg
@@ -148,13 +87,13 @@ const PatientTable = ({ patients, onEdit, onDelete }: PatientTableProps): React.
                 >
                   <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
                 </svg>
-                <span>Edit Patient</span>
+                <span>Edit In-Patient</span>
               </button>
               {currentUser?.isAdmin && (
                 <button
                   onClick={() => {
-                    onDelete(selectedPatient.id)
-                    setSelectedPatient(null)
+                    onDelete(selectedInPatient.id)
+                    setSelectedInPatient(null)
                   }}
                   className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-md transition-colors shadow-sm flex items-center space-x-1"
                 >
@@ -170,31 +109,33 @@ const PatientTable = ({ patients, onEdit, onDelete }: PatientTableProps): React.
                       clipRule="evenodd"
                     />
                   </svg>
-                  <span>Delete Patient</span>
+                  <span>Delete</span>
                 </button>
               )}
             </>
           ) : (
-            <div className="text-sm text-gray-500 italic flex items-center">
+            <div className="px-4 py-2 text-gray-500 flex items-center space-x-1">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 mr-1 text-blue-500"
-                viewBox="0 0 20 20"
-                fill="currentColor"
+                className="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
               >
                 <path
-                  fillRule="evenodd"
-                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                  clipRule="evenodd"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
               </svg>
-              Select a patient to perform actions
+              Select an in-patient to perform actions
             </div>
           )}
         </div>
       </div>
 
-      {/* Patient Table */}
+      {/* In-Patient Table */}
       <div className="overflow-x-auto bg-white rounded-lg shadow">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
@@ -203,79 +144,68 @@ const PatientTable = ({ patients, onEdit, onDelete }: PatientTableProps): React.
                 Date
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Token No.
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Patient ID
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Name
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Referred By
+                Guardian
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Age
+                Operation
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Gender
+                Department
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Phone
+                Doctor
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Address
+                Package Amount
               </th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {filteredPatients.length > 0 ? (
-              filteredPatients.map((patient, index) => (
+            {filteredInpatients.length > 0 ? (
+              filteredInpatients.map((inpatient) => (
                 <tr
-                  key={patient.id}
-                  onClick={() => handleRowClick(patient)}
+                  key={inpatient.id}
+                  onClick={() => handleRowClick(inpatient)}
                   className={`hover:bg-gray-50 cursor-pointer transition-colors ${
-                    selectedPatient?.id === patient.id ? 'bg-blue-50' : ''
-                  } ${index % 2 === 0 ? 'bg-gray-100' : ''}`}
+                    selectedInPatient?.id === inpatient.id ? 'bg-blue-50' : ''
+                  }`}
                 >
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {patient.date}
+                    {inpatient.date}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    <div className="p-0">
-                      <div className="font-bold leading-[1.9] min-w-[60px] w-[50px] relative px-1.5 rounded-[15px] text-center bg-[#bbb] shadow-inner">
-                        <span className="inline-block w-3 h-3 rounded-full bg-white shadow-inner"></span>
-                        <span className="ml-2">{getTokenNumber(patient)}</span>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {patient.patientId}
+                    {inpatient.patientId}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {patient.name}
+                    {inpatient.name}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {patient.referredBy || '-'}
+                    {inpatient.guardianName || '-'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {patient.age}
+                    {inpatient.operationName}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {patient.gender}
+                    {inpatient.department}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {patient.phone}
+                    {inpatient.doctorNames.join(', ')}
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-900 max-w-xs truncate">
-                    {patient.address}
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {formatCurrency(inpatient.packageAmount)}
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
                 <td colSpan={8} className="px-6 py-8 text-center text-gray-500 italic">
-                  No patients found matching your search
+                  No in-patients found matching your search
                 </td>
               </tr>
             )}
@@ -284,14 +214,14 @@ const PatientTable = ({ patients, onEdit, onDelete }: PatientTableProps): React.
       </div>
 
       <div className="mt-4 text-center text-gray-500">
-        {filteredPatients.length === 0 && searchTerm ? (
-          <p>No patients found matching your search. Try a different term.</p>
-        ) : filteredPatients.length === 0 ? (
-          <p>No patients available. Add your first patient using the button above.</p>
+        {filteredInpatients.length === 0 && searchTerm ? (
+          <p>No in-patients found matching your search. Try a different term.</p>
+        ) : filteredInpatients.length === 0 ? (
+          <p>No in-patients available. Add your first in-patient using the button above.</p>
         ) : null}
       </div>
     </div>
   )
 }
 
-export default PatientTable
+export default InPatientTable

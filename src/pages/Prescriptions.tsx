@@ -1047,7 +1047,7 @@ const Prescriptions: React.FC = () => {
         )}
 
         {/* Search Bar */}
-        <div className="my-2 bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+        <div className="hidden md:block my-2 bg-white p-4 rounded-lg shadow-sm border border-gray-100">
           <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-2">
             Search Patients
           </label>
