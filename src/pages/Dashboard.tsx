@@ -78,7 +78,7 @@ const Dashboard: React.FC = () => {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           {/* Quick Actions */}
             <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 hover:shadow-md cursor-pointer transition-all transform hover:-translate-y-1 hover:border-indigo-100">
               <Link
@@ -112,10 +112,10 @@ const Dashboard: React.FC = () => {
                 className=""
               >
                 <div className="flex items-center mb-4">
-                  <div className="bg-indigo-100 p-3 rounded-full mr-4">
+                  <div className="bg-green-100 p-3 rounded-full mr-4">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      className="h-8 w-8 text-indigo-600"
+                      className="h-8 w-8 text-green-600"
                       viewBox="0 0 20 20"
                       fill="currentColor"
                     >
@@ -124,12 +124,76 @@ const Dashboard: React.FC = () => {
                         d="M5 4a3 3 0 00-3 3v6a3 3 0 003 3h10a3 3 0 003-3V7a3 3 0 00-3-3H5zm0 2a1 1 0 00-1 1v6a1 1 0 001 1h10a1 1 0 001-1V7a1 1 0 00-1-1H5z"
                         clipRule="evenodd"
                       />
-                      <path d="M7 9a1 1 0 011-1h4a1 1 0 110 2H8a1 1 0 01-1-1z" />
+                      <path d="M10 9a2 2 0 100-4 2 2 0 000 4z" />
                     </svg>
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-900">Prescriptions</h3>
+                  <h2 className="text-xl font-semibold text-gray-800">Prescriptions</h2>
                 </div>
-                <p className="text-gray-600 ml-16">Manage prescriptions and receipts</p>
+                <p className="text-gray-600 mb-4">
+                  Create and manage patient prescriptions, including medications and advice.
+                </p>
+                <div className="flex justify-end">
+                  <span className="text-green-600 font-medium flex items-center">
+                    Access
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4 ml-1"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </span>
+                </div>
+              </Link>
+            </div>
+            {/* Labs Card */}
+            <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 hover:shadow-md cursor-pointer transition-all transform hover:-translate-y-1 hover:border-indigo-100">
+              <Link
+                to="/labs"
+                className=""
+              >
+                <div className="flex items-center mb-4">
+                  <div className="bg-blue-100 p-3 rounded-full mr-4">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-8 w-8 text-blue-600"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M7 2a1 1 0 00-.707 1.707L7 4.414v3.758a1 1 0 01-.293.707l-4 4C.817 14.769 2.156 18 4.828 18h10.343c2.673 0 4.012-3.231 2.122-5.121l-4-4A1 1 0 0113 8.172V4.414l.707-.707A1 1 0 0013 2H7zm2 6.172V4h2v4.172a3 3 0 00.879 2.12l1.027 1.028a4 4 0 00-2.171.102l-.47.156a4 4 0 01-2.53 0l-.563-.187a1.993 1.993 0 00-.114-.035l1.063-1.063A3 3 0 009 8.172z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </div>
+                  <h2 className="text-xl font-semibold text-gray-800">Labs</h2>
+                </div>
+                <p className="text-gray-600 mb-4">
+                  View and manage lab tests, results, and generate lab reports for patients.
+                </p>
+                <div className="flex justify-end">
+                  <span className="text-blue-600 font-medium flex items-center">
+                    Access
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4 ml-1"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </span>
+                </div>
               </Link>
             </div>
         </div>

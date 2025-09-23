@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard'
 import Prescription from './pages/Prescriptions'
 import ProtectedRoute from './components/ProtectedRoute'
 import Patients from './pages/Patients'
+import Labs from './pages/Labs'
 function App() {
   return (
     <Router>
@@ -32,6 +33,14 @@ function App() {
           element={
             <ProtectedRoute>
               <Patients />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/labs" 
+          element={
+            <ProtectedRoute>
+              <Labs />
             </ProtectedRoute>
           } 
         />
