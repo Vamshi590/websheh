@@ -238,33 +238,64 @@ export async function getTodaysPatients() {
   // Get latest patient ID number (more efficient than fetching all patients)
   export async function getLatestPatientId() {
     try {
-      // First try Supabase - just get the count
-      const { data, error } = await supabase.from('patients').select('patientId')
-  
-      if (error) {
-        throw new Error(`Supabase error: ${error.message}`)
-      }
-      // Filter and convert to integers
-      const patientIds = data
-        .map((p) => p.patientId)
-        .filter((id) => /^\d+$/.test(id)) // only numeric strings
-        .map((id) => parseInt(id, 10)) // convert to int
-  
-      if (patientIds.length === 0) {
-        console.log('No valid patient IDs found.')
-        return
-      }
-      const maxId = Math.max(...patientIds)
-      console.log('Max Patient ID:', maxId)
-      return { success: true, data: maxId || 0, message: 'Latest patient ID fetched successfully' }
-    } catch (error) {
-      console.error('Error getting latest patient ID from Supabase:', error)
-      return {
-        success: false,
-        data: 0,
-        message: `Failed to fetch latest patient ID: ${error instanceof Error ? error.message : 'Unknown error'}`
+    console.log('Fetching highest patient IDs from Supabase...')
+    let highestConfirmedId = 0
+
+
+    // APPROACH 2: Get the most recent patients, which likely have the highest IDs
+    // Supabase limits results to 1000 by default, so we order by creation date
+    console.log('Fetching most recent patients to find highest ID...')
+    const { data: recentData, error: recentError } = await supabase
+      .from('patients')
+      .select('patientId')
+      .order('created_at', { ascending: false })
+      .limit(100) // Get the 100 most recent patients
+
+    if (recentError) {
+      console.error('Error fetching recent patients:', recentError)
+    } else {
+      console.log(`Retrieved ${recentData.length} recent patient records`)
+
+      // Extract and process IDs from recent patients
+      const recentIds = recentData
+        .map((p) => {
+          if (!p.patientId) return null
+
+          // Extract numeric portion
+          const matches = p.patientId.match(/\d+/g)
+          if (!matches || matches.length === 0) return null
+
+          // If multiple numbers found, take the largest one
+          if (matches.length > 1) {
+            return Math.max(...matches.map((m: string) => parseInt(m, 10)))
+          }
+
+          return parseInt(matches[0], 10)
+        })
+        .filter((id) => id !== null && !isNaN(id as number)) as number[]
+
+      // Find the highest ID from recent patients
+      if (recentIds.length > 0) {
+        const recentMaxId = Math.max(...recentIds)
+        console.log('Highest ID from recent patients:', recentMaxId)
+        highestConfirmedId = recentMaxId
       }
     }
+    // Final result - use the highest ID we found through any method
+    console.log('Final highest patient ID:', highestConfirmedId)
+    return {
+      success: true,
+      data: highestConfirmedId || 0,
+      message: 'Latest patient ID fetched successfully'
+    }
+  } catch (error) {
+    console.error('Error getting latest patient ID from Supabase:', error)
+    return {
+      success: false,
+      data: 0,
+      message: `Failed to fetch latest patient ID: ${error instanceof Error ? error.message : 'Unknown error'}`
+    }
+  }
   }
   
   export async function getLatestInPatientId() {

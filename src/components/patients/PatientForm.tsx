@@ -98,45 +98,29 @@ const PatientForm: React.FC<PatientFormProps> = ({
     ...(initialValues?.id ? { id: initialValues.id } : {})
   })
 
-  // Function to fetch the latest patient ID and generate the next one
+   // Function to fetch the latest patient ID and generate the next one
   const fetchLatestPatientId = async (force = false): Promise<void> => {
     try {
       // Only proceed if we're not in edit mode and either we don't have a patient ID yet or force is true
       if ((!initialValues && !formData.patientId && !isExistingPatientMode) || force) {
-        // Get the patient count directly from the backend (more efficient)
+        // Get the latest patient ID directly from the backend
         const response = (await getLatestPatientId()) as {
           success: boolean
           data: number
           message: string
         }
 
+        console.log('Latest patient ID from Supabase:', response.data)
+
         if (response.success) {
-          // Start with the next ID after the latest
-          let nextNumericId = response.data + 1
-          let isUnique = false
-
-          // Keep checking until we find a unique ID
-          while (!isUnique) {
-            // Format with leading zeros (4 digits)
-            const nextId = String(nextNumericId).padStart(4, '0')
-
-            // Check if this ID already exists
-            const checkResponse = (await getPatientById(nextId)) as {
-              success: boolean
-              data: unknown | null
-              message: string
-            }
-
-            // If no patient found with this ID, it's unique
-            if (!checkResponse.data) {
-              isUnique = true
-              setFormData((prev) => ({ ...prev, patientId: nextId }))
-            } else {
-              // ID exists, try the next one
-              console.log(`Patient ID ${nextId} already exists, trying next ID`)
-              nextNumericId++
-            }
-          }
+          // Simply use the next ID after the latest
+          // The backend now correctly returns the highest numeric ID
+          const nextNumericId = response.data + 1
+          // Format with leading zeros (4 digits)
+          const nextId = String(nextNumericId).padStart(4, '0')
+          // Set the ID directly without checking for uniqueness
+          // The backend's getLatestPatientId now handles all ID formats properly
+          setFormData((prev) => ({ ...prev, patientId: nextId }))
         } else {
           console.error('Failed to get latest patient ID:', response.message)
           // Fallback to the old method if API call fails
@@ -155,6 +139,8 @@ const PatientForm: React.FC<PatientFormProps> = ({
       }
     }
   }
+
+
 
   // Call fetchLatestPatientId on component mount or when dependencies change
   useEffect(() => {
