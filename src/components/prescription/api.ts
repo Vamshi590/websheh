@@ -119,4 +119,90 @@ export const addPrescription = async (prescription: Prescription) => {
       throw error
     }
   }
+
+
+  // Get prescriptions by patient ID
+export const getPrescriptionsByPatientId = async (patientId: string) => {
+  try {
+    // Fetch prescriptions for the specific patient from Supabase
+    const { data: prescriptions, error } = await supabase
+      .from('prescriptions')
+      .select('*')
+      .eq('PATIENT ID', patientId)
+      .order('DATE', { ascending: false })
+
+    if (error) {
+      throw new Error(`Supabase error: ${error.message}`)
+    }
+
+    console.log(`Prescriptions for patient ${patientId} fetched successfully`)
+    return {
+      success: true,
+      data: prescriptions || [],
+      message:
+        prescriptions && prescriptions.length > 0
+          ? `Found ${prescriptions.length} prescriptions for patient`
+          : 'No prescriptions found for this patient'
+    }
+  } catch (error) {
+    console.error(`Error getting prescriptions for patient ${patientId}:`, error)
+    return {
+      success: false,
+      data: [],
+      message: `Failed to fetch prescriptions: ${error instanceof Error ? error.message : 'Unknown error'}`
+    }
+  }
+}
+
+
+
+// Get all prescriptions and receipts with pagination
+export const getPrescriptions = async (page = 1, pageSize = 10) => {
+  try {
+    // Convert parameters to numbers and ensure they're valid
+    const pageNum = Number(page)
+    const pageSizeNum = Number(pageSize)
+
+    // Calculate range for pagination
+    const from = (pageNum - 1) * pageSizeNum
+    const to = from + pageSizeNum - 1
+
+    // Get total count first
+    const { count, error: countError } = await supabase
+      .from('prescriptions')
+      .select('*', { count: 'exact', head: true })
+
+    if (countError) {
+      throw new Error(`Supabase count error: ${countError.message}`)
+    }
+
+    // Fetch prescriptions with pagination
+    const { data: prescriptions, error } = await supabase
+      .from('prescriptions')
+      .select('*')
+      .order('DATE', { ascending: false })
+      .range(from, to)
+
+    if (error) {
+      throw new Error(`Supabase error: ${error.message}`)
+    }
+
+    // Return standardized response format
+    return {
+      success: true,
+      data: prescriptions || [],
+      totalCount: count || 0,
+      page: pageNum,
+      pageSize: pageSizeNum,
+      totalPages: Math.ceil((count || 0) / pageSizeNum)
+    }
+  } catch (error) {
+    console.error('Error getting prescriptions from Supabase:', error)
+    return {
+      success: false,
+      data: [],
+      message: `Failed to fetch prescriptions: ${error instanceof Error ? error.message : 'Unknown error'}`
+    }
+  }
+}
   

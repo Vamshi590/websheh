@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import html2canvas from 'html2canvas'
 import ReceiptViewer from '../reports/ReceiptViewer'
-import { saveAs } from 'file-saver'
 import { PDFDocument } from 'pdf-lib'
 import { toast, Toaster } from 'sonner'
 
@@ -355,7 +354,6 @@ const LabTableWithReceipts: React.FC<LabTableWithReceiptsProps> = ({
       }
 
       // Attempt silent save if Node fs API is available (Electron renderer with contextIsolation disabled)
-      let savedSilently = false
       try {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const _require = (window as any).require
@@ -366,18 +364,13 @@ const LabTableWithReceipts: React.FC<LabTableWithReceiptsProps> = ({
           // Save to Desktop instead of Downloads
           const dest = path.join(os.homedir(), 'Desktop', fileName)
           fs.writeFileSync(dest, Buffer.from(pdfBytes), { encoding: 'binary' })
-          savedSilently = true
           console.log(`File saved to: ${dest}`)
         }
       } catch (err) {
         console.error('Failed to save file silently:', err)
       }
 
-      if (!savedSilently) {
-        const blob = new Blob([pdfBytes], { type: 'application/pdf' })
-        saveAs(blob, fileName)
-      }
-
+    
       // Small delay to ensure file is saved before opening WhatsApp
       await new Promise((resolve) => setTimeout(resolve, 4500))
 
