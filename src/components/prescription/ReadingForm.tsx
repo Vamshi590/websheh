@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import EditableCombobox from '../common/EditableCombobox'
-import type { Patient } from './ReceiptForm'
+import GridCombobox from '../common/GridCombobox'
+import type { Patient } from './types'
 
 // Standard options for eye prescription fields
 const sphOptions = [
@@ -452,7 +452,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
     }))
   }
 
-  // Handle EditableCombobox changes
+  // Handle GridCombobox changes
   const handleComboboxChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ): void => {
@@ -471,8 +471,6 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
 
   return (
     <form className="space-y-4" onSubmit={handleSubmit}>
-      <h2 className="text-xl font-medium">Eye Reading Form</h2>
-
       {/* Section 2: Auto Refractometer (AR) */}
       <div className="bg-gray-50 md:px-4 pt-5 pb-4 rounded-md">
         <h3 className="text-md font-medium mb-2 flex items-center">Auto Refractometer (AR)</h3>
@@ -483,7 +481,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
           <div className="grid grid-cols-2 gap-2">
             <div>
               <label className="block text-xs font-medium text-gray-700">SPH</label>
-              <EditableCombobox
+              <GridCombobox
                 id="AR-RE-SPH"
                 name="AR-RE-SPH"
                 value={formData['AR-RE-SPH']}
@@ -494,7 +492,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700">CYL</label>
-              <EditableCombobox
+              <GridCombobox
                 id="AR-RE-CYL"
                 name="AR-RE-CYL"
                 value={formData['AR-RE-CYL']}
@@ -505,7 +503,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700">AXIS</label>
-              <EditableCombobox
+              <GridCombobox
                 id="AR-RE-AXIS"
                 name="AR-RE-AXIS"
                 value={formData['AR-RE-AXIS']}
@@ -516,7 +514,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700">VA</label>
-              <EditableCombobox
+              <GridCombobox
                 id="AR-RE-VA"
                 name="AR-RE-VA"
                 value={formData['AR-RE-VA']}
@@ -544,7 +542,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
           <div className="grid grid-cols-2 gap-2">
             <div>
               <label className="block text-xs font-medium text-gray-700 block md:hidden">SPH</label>
-              <EditableCombobox
+              <GridCombobox
                 id="AR-LE-SPH"
                 name="AR-LE-SPH"
                 value={formData['AR-LE-SPH']}
@@ -555,7 +553,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 block md:hidden">CYL</label>
-              <EditableCombobox
+              <GridCombobox
                 id="AR-LE-CYL"
                 name="AR-LE-CYL"
                 value={formData['AR-LE-CYL']}
@@ -566,7 +564,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 block md:hidden">AXIS</label>
-              <EditableCombobox
+              <GridCombobox
                 id="AR-LE-AXIS"
                 name="AR-LE-AXIS"
                 value={formData['AR-LE-AXIS']}
@@ -577,7 +575,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 block md:hidden">VA</label>
-              <EditableCombobox
+              <GridCombobox
                 id="AR-LE-VA"
                 name="AR-LE-VA"
                 value={formData['AR-LE-VA']}
@@ -620,7 +618,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
           <div className="grid grid-cols-2 gap-2">
             <div>
               <label className="block text-xs font-medium text-gray-700">SPH</label>
-              <EditableCombobox
+              <GridCombobox
                 id="GR-RE-D-SPH"
                 name="GR-RE-D-SPH"
                 value={formData['GR-RE-D-SPH']}
@@ -631,7 +629,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700">CYL</label>
-              <EditableCombobox
+              <GridCombobox
                 id="GR-RE-D-CYL"
                 name="GR-RE-D-CYL"
                 value={formData['GR-RE-D-CYL']}
@@ -642,7 +640,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700">AXIS</label>
-              <EditableCombobox
+              <GridCombobox
                 id="GR-RE-D-AXIS"
                 name="GR-RE-D-AXIS"
                 value={formData['GR-RE-D-AXIS']}
@@ -653,7 +651,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700">VISION</label>
-              <EditableCombobox
+              <GridCombobox
                 id="GR-RE-D-VISION"
                 name="GR-RE-D-VISION"
                 value={formData['GR-RE-D-VISION']}
@@ -671,7 +669,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
           <div className="grid grid-cols-2 gap-2">
             <div>
               <label className="block text-xs font-medium text-gray-700 block md:hidden">SPH</label>
-              <EditableCombobox
+              <GridCombobox
                 id="GR-RE-N-SPH"
                 name="GR-RE-N-SPH"
                 value={formData['GR-RE-N-SPH']}
@@ -682,7 +680,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 block md:hidden">CYL</label>
-              <EditableCombobox
+              <GridCombobox
                 id="GR-RE-N-CYL"
                 name="GR-RE-N-CYL"
                 value={formData['GR-RE-N-CYL']}
@@ -693,7 +691,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 block md:hidden">AXIS</label>
-              <EditableCombobox
+              <GridCombobox
                 id="GR-RE-N-AXIS"
                 name="GR-RE-N-AXIS"
                 value={formData['GR-RE-N-AXIS']}
@@ -704,7 +702,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 block md:hidden">VISION</label>
-              <EditableCombobox
+              <GridCombobox
                 id="GR-RE-N-VISION"
                 name="GR-RE-N-VISION"
                 value={formData['GR-RE-N-VISION']}
@@ -722,7 +720,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
           <div className="grid grid-cols-2 gap-2">
             <div>
               <label className="block text-xs font-medium text-gray-700 block md:hidden">SPH</label>
-              <EditableCombobox
+              <GridCombobox
                 id="GR-LE-D-SPH"
                 name="GR-LE-D-SPH"
                 value={formData['GR-LE-D-SPH']}
@@ -733,7 +731,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 block md:hidden">CYL</label>
-              <EditableCombobox
+              <GridCombobox
                 id="GR-LE-D-CYL"
                 name="GR-LE-D-CYL"
                 value={formData['GR-LE-D-CYL']}
@@ -744,7 +742,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 block md:hidden">AXIS</label>
-              <EditableCombobox
+              <GridCombobox
                 id="GR-LE-D-AXIS"
                 name="GR-LE-D-AXIS"
                 value={formData['GR-LE-D-AXIS']}
@@ -755,7 +753,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 block md:hidden">VISION</label>
-              <EditableCombobox
+              <GridCombobox
                 id="GR-LE-D-VISION"
                 name="GR-LE-D-VISION"
                 value={formData['GR-LE-D-VISION']}
@@ -773,7 +771,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
           <div className="grid grid-cols-2 gap-2">
             <div>
               <label className="block text-xs font-medium text-gray-700 block md:hidden">SPH</label>
-              <EditableCombobox
+              <GridCombobox
                 id="GR-LE-N-SPH"
                 name="GR-LE-N-SPH"
                 value={formData['GR-LE-N-SPH']}
@@ -784,7 +782,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 block md:hidden">CYL</label>
-              <EditableCombobox
+              <GridCombobox
                 id="GR-LE-N-CYL"
                 name="GR-LE-N-CYL"
                 value={formData['GR-LE-N-CYL']}
@@ -795,7 +793,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 block md:hidden">AXIS</label>
-              <EditableCombobox
+              <GridCombobox
                 id="GR-LE-N-AXIS"
                 name="GR-LE-N-AXIS"
                 value={formData['GR-LE-N-AXIS']}
@@ -806,7 +804,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 block md:hidden">VISION</label>
-              <EditableCombobox
+              <GridCombobox
                 id="GR-LE-N-VISION"
                 name="GR-LE-N-VISION"
                 value={formData['GR-LE-N-VISION']}
@@ -831,7 +829,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
           <div className="grid grid-cols-2 gap-2">
             <div>
               <label className="block text-xs font-medium text-gray-700">SPH</label>
-              <EditableCombobox
+              <GridCombobox
                 id="PGP-RE-D-SPH"
                 name="PGP-RE-D-SPH"
                 value={formData['PGP-RE-D-SPH']}
@@ -842,7 +840,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700">CYL</label>
-              <EditableCombobox
+              <GridCombobox
                 id="PGP-RE-D-CYL"
                 name="PGP-RE-D-CYL"
                 value={formData['PGP-RE-D-CYL']}
@@ -853,7 +851,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700">AXIS</label>
-              <EditableCombobox
+              <GridCombobox
                 id="PGP-RE-D-AXIS"
                 name="PGP-RE-D-AXIS"
                 value={formData['PGP-RE-D-AXIS']}
@@ -864,7 +862,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700">VA</label>
-              <EditableCombobox
+              <GridCombobox
                 id="PGP-RE-D-VA"
                 name="PGP-RE-D-VA"
                 value={formData['PGP-RE-D-VA']}
@@ -882,7 +880,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
           <div className="grid grid-cols-2 gap-2">
             <div>
               <label className="block text-xs font-medium text-gray-700 block md:hidden">SPH</label>
-              <EditableCombobox
+              <GridCombobox
                 id="PGP-RE-N-SPH"
                 name="PGP-RE-N-SPH"
                 value={formData['PGP-RE-N-SPH']}
@@ -893,7 +891,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 block md:hidden">CYL</label>
-              <EditableCombobox
+              <GridCombobox
                 id="PGP-RE-N-CYL"
                 name="PGP-RE-N-CYL"
                 value={formData['PGP-RE-N-CYL']}
@@ -904,7 +902,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 block md:hidden">AXIS</label>
-              <EditableCombobox
+              <GridCombobox
                 id="PGP-RE-N-AXIS"
                 name="PGP-RE-N-AXIS"
                 value={formData['PGP-RE-N-AXIS']}
@@ -915,7 +913,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 block md:hidden">VISION</label>
-              <EditableCombobox
+              <GridCombobox
                 id="PGP-RE-N-VA"
                 name="PGP-RE-N-VA"
                 value={formData['PGP-RE-N-VA']}
@@ -933,7 +931,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
           <div className="grid grid-cols-2 gap-2">
             <div>
               <label className="block text-xs font-medium text-gray-700 block md:hidden">SPH</label>
-              <EditableCombobox
+              <GridCombobox
                 id="PGP-LE-D-SPH"
                 name="PGP-LE-D-SPH"
                 value={formData['PGP-LE-D-SPH']}
@@ -944,7 +942,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 block md:hidden">CYL</label>
-              <EditableCombobox
+              <GridCombobox
                 id="PGP-LE-D-CYL"
                 name="PGP-LE-D-CYL"
                 value={formData['PGP-LE-D-CYL']}
@@ -955,7 +953,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 block md:hidden">AXIS</label>
-              <EditableCombobox
+              <GridCombobox
                 id="PGP-LE-D-AXIS"
                 name="PGP-LE-D-AXIS"
                 value={formData['PGP-LE-D-AXIS']}
@@ -966,7 +964,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 block md:hidden">BCVA</label>
-              <EditableCombobox
+              <GridCombobox
                 id="PGP-LE-D-BCVA"
                 name="PGP-LE-D-BCVA"
                 value={formData['PGP-LE-D-BCVA']}
@@ -984,7 +982,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
           <div className="grid grid-cols-2 gap-2">
             <div>
               <label className="block text-xs font-medium text-gray-700 block md:hidden">SPH</label>
-              <EditableCombobox
+              <GridCombobox
                 id="PGP-LE-N-SPH"
                 name="PGP-LE-N-SPH"
                 value={formData['PGP-LE-N-SPH']}
@@ -995,7 +993,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 block md:hidden">CYL</label>
-              <EditableCombobox
+              <GridCombobox
                 id="PGP-LE-N-CYL"
                 name="PGP-LE-N-CYL"
                 value={formData['PGP-LE-N-CYL']}
@@ -1006,7 +1004,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 block md:hidden">AXIS</label>
-              <EditableCombobox
+              <GridCombobox
                 id="PGP-LE-N-AXIS"
                 name="PGP-LE-N-AXIS"
                 value={formData['PGP-LE-N-AXIS']}
@@ -1017,7 +1015,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 block md:hidden">BCVA</label>
-              <EditableCombobox
+              <GridCombobox
                 id="PGP-LE-N-BCVA"
                 name="PGP-LE-N-BCVA"
                 value={formData['PGP-LE-N-BCVA']}
@@ -1040,7 +1038,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
           <div className="grid grid-cols-2 gap-2">
             <div>
               <label className="block text-xs font-medium text-gray-700">SPH</label>
-              <EditableCombobox
+              <GridCombobox
                 id="SR-RE-D-SPH"
                 name="SR-RE-D-SPH"
                 value={formData['SR-RE-D-SPH']}
@@ -1051,7 +1049,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700">CYL</label>
-              <EditableCombobox
+              <GridCombobox
                 id="SR-RE-D-CYL"
                 name="SR-RE-D-CYL"
                 value={formData['SR-RE-D-CYL']}
@@ -1062,7 +1060,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700">AXIS</label>
-              <EditableCombobox
+              <GridCombobox
                 id="SR-RE-D-AXIS"
                 name="SR-RE-D-AXIS"
                 value={formData['SR-RE-D-AXIS']}
@@ -1073,7 +1071,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700">VA</label>
-              <EditableCombobox
+              <GridCombobox
                 id="SR-RE-D-VA"
                 name="SR-RE-D-VA"
                 value={formData['SR-RE-D-VA']}
@@ -1091,7 +1089,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
           <div className="grid grid-cols-2 gap-2">
             <div>
               <label className="block text-xs font-medium text-gray-700 block md:hidden">SPH</label>
-              <EditableCombobox
+              <GridCombobox
                 id="SR-RE-N-SPH"
                 name="SR-RE-N-SPH"
                 value={formData['SR-RE-N-SPH']}
@@ -1102,7 +1100,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 block md:hidden">CYL</label>
-              <EditableCombobox
+              <GridCombobox
                 id="SR-RE-N-CYL"
                 name="SR-RE-N-CYL"
                 value={formData['SR-RE-N-CYL']}
@@ -1113,7 +1111,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 block md:hidden">AXIS</label>
-              <EditableCombobox
+              <GridCombobox
                 id="SR-RE-N-AXIS"
                 name="SR-RE-N-AXIS"
                 value={formData['SR-RE-N-AXIS']}
@@ -1124,7 +1122,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 block md:hidden">VA</label>
-              <EditableCombobox
+              <GridCombobox
                 id="SR-RE-N-VA"
                 name="SR-RE-N-VA"
                 value={formData['SR-RE-N-VA']}
@@ -1142,7 +1140,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
           <div className="grid grid-cols-2 gap-2">
             <div>
               <label className="block text-xs font-medium text-gray-700 block md:hidden">SPH</label>
-              <EditableCombobox
+              <GridCombobox
                 id="SR-LE-D-SPH"
                 name="SR-LE-D-SPH"
                 value={formData['SR-LE-D-SPH']}
@@ -1153,7 +1151,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 block md:hidden">CYL</label>
-              <EditableCombobox
+              <GridCombobox
                 id="SR-LE-D-CYL"
                 name="SR-LE-D-CYL"
                 value={formData['SR-LE-D-CYL']}
@@ -1164,7 +1162,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 block md:hidden">AXIS</label>
-              <EditableCombobox
+              <GridCombobox
                 id="SR-LE-D-AXIS"
                 name="SR-LE-D-AXIS"
                 value={formData['SR-LE-D-AXIS']}
@@ -1175,7 +1173,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 block md:hidden">BCVA</label>
-              <EditableCombobox
+              <GridCombobox
                 id="SR-LE-D-BCVA"
                 name="SR-LE-D-BCVA"
                 value={formData['SR-LE-D-BCVA']}
@@ -1193,7 +1191,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
           <div className="grid grid-cols-2 gap-2">
             <div>
               <label className="block text-xs font-medium text-gray-700 block md:hidden">SPH</label>
-              <EditableCombobox
+              <GridCombobox
                 id="SR-LE-N-SPH"
                 name="SR-LE-N-SPH"
                 value={formData['SR-LE-N-SPH']}
@@ -1204,7 +1202,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 block md:hidden">CYL</label>
-              <EditableCombobox
+              <GridCombobox
                 id="SR-LE-N-CYL"
                 name="SR-LE-N-CYL"
                 value={formData['SR-LE-N-CYL']}
@@ -1215,7 +1213,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 block md:hidden">AXIS</label>
-              <EditableCombobox
+              <GridCombobox
                 id="SR-LE-N-AXIS"
                 name="SR-LE-N-AXIS"
                 value={formData['SR-LE-N-AXIS']}
@@ -1226,7 +1224,7 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 block md:hidden">BCVA</label>
-              <EditableCombobox
+              <GridCombobox
                 id="SR-LE-N-BCVA"
                 name="SR-LE-N-BCVA"
                 value={formData['SR-LE-N-BCVA']}
@@ -1239,387 +1237,9 @@ const ReadingForm: React.FC<ReadingFormProps> = ({
         </div>
       </div>
 
-      {/* Section 5: Clinical Findings (CF) */}
-      <div className="bg-gray-50 md:px-4 pt-5 pb-4 rounded-md">
-        <h3 className="text-md font-medium mb-2 flex items-center">Clinical Findings (CF)</h3>
-
-        {/* Right Eye Clinical Findings */}
-        <div className="mb-3">
-          <h4 className="text-sm font-medium mb-1">Right Eye:</h4>
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <label className="block text-xs font-medium text-gray-700">Lid</label>
-              <input
-                type="text"
-                name="CF-RE-LIDS"
-                value={formData['CF-RE-LIDS']}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-1 px-2 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-700">SAC</label>
-              <input
-                type="text"
-                name="CF-RE-SAC"
-                value={formData['CF-RE-SAC']}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-1 px-2 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-700">Cornea</label>
-              <input
-                type="text"
-                name="CF-RE-CORNEA"
-                value={formData['CF-RE-CORNEA']}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-1 px-2 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-700">Conjunctiva</label>
-              <input
-                type="text"
-                name="CF-RE-CONJUCTIVA"
-                value={formData['CF-RE-CONJUCTIVA']}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-1 px-2 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-700">Anterior Chamber</label>
-              <input
-                type="text"
-                name="CF-RE-A.C."
-                value={formData['CF-RE-A.C.']}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-1 px-2 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-700">Iris</label>
-              <input
-                type="text"
-                name="CF-RE-IRIS"
-                value={formData['CF-RE-IRIS']}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-1 px-2 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-700">Pupil</label>
-              <input
-                type="text"
-                name="CF-RE-PUPIL"
-                value={formData['CF-RE-PUPIL']}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-1 px-2 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-700">Lens</label>
-              <input
-                type="text"
-                name="CF-RE-LENS"
-                value={formData['CF-RE-LENS']}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-1 px-2 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            <div className="hidden">
-              <label className="block text-xs font-medium text-gray-700">Tension</label>
-              <input
-                type="text"
-                name="CF-RE-TENSION"
-                value={formData['CF-RE-TENSION']}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-1 px-2 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-700">Fundus</label>
-              <input
-                type="text"
-                name="CF-RE-FUNDUS"
-                value={formData['CF-RE-FUNDUS']}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-1 px-2 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-700">Optical Disk</label>
-              <input
-                type="text"
-                name="CF-RE-OPTICALDISK"
-                value={formData['CF-RE-OPTICALDISK']}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-1 px-2 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-700">Macula</label>
-              <input
-                type="text"
-                name="CF-RE-MACULA"
-                value={formData['CF-RE-MACULA']}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-1 px-2 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-700">Vessels</label>
-              <input
-                type="text"
-                name="CF-RE-VESSELS"
-                value={formData['CF-RE-VESSELS']}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-1 px-2 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-700">Peripheral Retina</label>
-              <input
-                type="text"
-                name="CF-RE-PERIPHERALRETINA"
-                value={formData['CF-RE-PERIPHERALRETINA']}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-1 px-2 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-700">Retino 1</label>
-              <input
-                type="text"
-                name="CF-RE-RETINO 1"
-                value={formData['CF-RE-RETINO 1']}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-1 px-2 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-700">Retino 2</label>
-              <input
-                type="text"
-                name="CF-RE-RETINO 2"
-                value={formData['CF-RE-RETINO 2']}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-1 px-2 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-700">Retino 3</label>
-              <input
-                type="text"
-                name="CF-RE-RETINO 3"
-                value={formData['CF-RE-RETINO 3']}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-1 px-2 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-700">Retino 4</label>
-              <input
-                type="text"
-                name="CF-RE-RETINO 4"
-                value={formData['CF-RE-RETINO 4']}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-1 px-2 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Left Eye Clinical Findings */}
-        <div className="mb-3">
-          <h4 className="text-sm font-medium mb-1">Left Eye:</h4>
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <label className="block text-xs font-medium text-gray-700">Lids</label>
-              <input
-                type="text"
-                name="CF-LE-LIDS"
-                value={formData['CF-LE-LIDS']}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-1 px-2 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-700">SAC</label>
-              <input
-                type="text"
-                name="CF-LE-SAC"
-                value={formData['CF-LE-SAC']}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-1 px-2 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-700">Cornea</label>
-              <input
-                type="text"
-                name="CF-LE-CORNEA"
-                value={formData['CF-LE-CORNEA']}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-1 px-2 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-700">Conjunctiva</label>
-              <input
-                type="text"
-                name="CF-LE-CONJUCTIVA"
-                value={formData['CF-LE-CONJUCTIVA']}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-1 px-2 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-700">Anterior Chamber</label>
-              <input
-                type="text"
-                name="CF-LE-A.C."
-                value={formData['CF-LE-A.C.']}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-1 px-2 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-700">Iris</label>
-              <input
-                type="text"
-                name="CF-LE-IRIS"
-                value={formData['CF-LE-IRIS']}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-1 px-2 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-700">Pupil</label>
-              <input
-                type="text"
-                name="CF-LE-PUPIL"
-                value={formData['CF-LE-PUPIL']}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-1 px-2 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-700">Lens</label>
-              <input
-                type="text"
-                name="CF-LE-LENS"
-                value={formData['CF-LE-LENS']}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-1 px-2 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            <div className="hidden">
-              <label className="block text-xs font-medium text-gray-700">Tension</label>
-              <input
-                type="text"
-                name="CF-LE-TENSION"
-                value={formData['CF-LE-TENSION']}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-1 px-2 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-700">Fundus</label>
-              <input
-                type="text"
-                name="CF-LE-FUNDUS"
-                value={formData['CF-LE-FUNDUS']}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-1 px-2 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-700">Optical Disk</label>
-              <input
-                type="text"
-                name="CF-LE-OPTICALDISK"
-                value={formData['CF-LE-OPTICALDISK']}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-1 px-2 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-700">Macula</label>
-              <input
-                type="text"
-                name="CF-LE-MACULA"
-                value={formData['CF-LE-MACULA']}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-1 px-2 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-700">Vessels</label>
-              <input
-                type="text"
-                name="CF-LE-VESSELS"
-                value={formData['CF-LE-VESSELS']}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-1 px-2 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-700">Peripheral Retina</label>
-              <input
-                type="text"
-                name="CF-LE-PERIPHERALRETINA"
-                value={formData['CF-LE-PERIPHERALRETINA']}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-1 px-2 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-700">Retino 1 </label>
-              <input
-                type="text"
-                name="CF-LE-RETINO 1"
-                value={formData['CF-LE-RETINO 1']}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-1 px-2 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-700">Retino 2</label>
-              <input
-                type="text"
-                name="CF-LE-RETINO 2"
-                value={formData['CF-LE-RETINO 2']}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-1 px-2 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-700">Retino 3</label>
-              <input
-                type="text"
-                name="CF-LE-RETINO 3"
-                value={formData['CF-LE-RETINO 3']}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-1 px-2 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-700">Retino 4</label>
-              <input
-                type="text"
-                name="CF-LE-RETINO 4"
-                value={formData['CF-LE-RETINO 4']}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-1 px-2 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Submit and Cancel Buttons */}
-      <div className="flex justify-end space-x-3 mt-6">
+      {/* Submit and Cancel Buttons — pinned to the bottom of the modal's
+          scroll container so staff can save without scrolling to the end. */}
+      <div className="sticky bottom-0 bg-white border-t border-gray-200 py-3 px-2 flex justify-end gap-3 mt-6 shadow-[0_-4px_12px_-6px_rgba(0,0,0,0.08)]">
         <button
           type="button"
           onClick={onCancel}
