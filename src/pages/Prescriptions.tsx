@@ -275,9 +275,9 @@ const EyeReadings: React.FC = () => {
                         </div>
                         <div className="mt-1 text-xs text-gray-500 flex flex-wrap gap-x-3 gap-y-1">
                           {p.AGE != null && <span>Age {String(p.AGE)}</span>}
-                          {p.GENDER && <span>{String(p.GENDER)}</span>}
-                          {p['PHONE NUMBER'] && <span>{String(p['PHONE NUMBER'])}</span>}
-                          {p.DATE && <span>{String(p.DATE)}</span>}
+                          {!!p.GENDER && <span>{String(p.GENDER)}</span>}
+                          {!!p['PHONE NUMBER'] && <span>{String(p['PHONE NUMBER'])}</span>}
+                          {!!p.DATE && <span>{String(p.DATE)}</span>}
                           {!hasAr && mins != null && (
                             <span className="font-medium text-gray-700">
                               Waiting {formatWait(mins)}
