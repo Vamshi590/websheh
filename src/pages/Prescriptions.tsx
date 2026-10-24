@@ -307,6 +307,11 @@ const EyeReadings: React.FC = () => {
                               Waiting {formatWait(mins)}
                             </span>
                           )}
+                          {!!p['PAID FOR'] && (
+                            <span className="font-medium text-emerald-700">
+                              Paid for: {String(p['PAID FOR'])}
+                            </span>
+                          )}
                         </div>
                       </div>
                       <div className="shrink-0 flex flex-col items-end gap-1">
