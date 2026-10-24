@@ -33,6 +33,30 @@ const hasArReadings = (p: Prescription): boolean =>
     return v !== undefined && v !== null && String(v).trim() !== ''
   })
 
+const MEDICAL_FIELDS = ['PRESENT COMPLAIN', 'PREVIOUS HISTORY'] as const
+
+const hasMedicalHistory = (p: Prescription): boolean =>
+  MEDICAL_FIELDS.some((f) => {
+    const v = p[f as string]
+    return v !== undefined && v !== null && String(v).trim() !== ''
+  })
+
+// Where the patient is in the journey. Mirrors the status pill used in the
+// desktop app so staff see consistent labels across devices.
+const patientStatus = (
+  p: Prescription
+): { label: string; badge: string } => {
+  const ar = hasArReadings(p)
+  const med = hasMedicalHistory(p)
+  if (!ar && !med)
+    return { label: 'Optometrist', badge: 'bg-rose-50 text-rose-700 border-rose-200' }
+  if (ar && !med)
+    return { label: 'Doctor', badge: 'bg-amber-50 text-amber-700 border-amber-200' }
+  if (ar && med)
+    return { label: 'Complete', badge: 'bg-emerald-50 text-emerald-700 border-emerald-200' }
+  return { label: 'Medical Only', badge: 'bg-sky-50 text-sky-700 border-sky-200' }
+}
+
 // 94 → "1h 34m". Keeps minute-level precision but reads naturally once the
 // wait crosses an hour (which happens often on busy days).
 const formatWait = (mins: number): string => {
@@ -285,11 +309,23 @@ const EyeReadings: React.FC = () => {
                           )}
                         </div>
                       </div>
-                      <span
-                        className={`shrink-0 text-[11px] font-medium px-2 py-0.5 rounded-full border ${tone.badge}`}
-                      >
-                        {hasAr ? 'AR done' : 'Pending'}
-                      </span>
+                      <div className="shrink-0 flex flex-col items-end gap-1">
+                        <span
+                          className={`text-[11px] font-medium px-2 py-0.5 rounded-full border ${tone.badge}`}
+                        >
+                          {hasAr ? 'AR done' : 'Pending'}
+                        </span>
+                        {(() => {
+                          const s = patientStatus(p)
+                          return (
+                            <span
+                              className={`text-[11px] font-medium px-2 py-0.5 rounded-full border ${s.badge}`}
+                            >
+                              {s.label}
+                            </span>
+                          )
+                        })()}
+                      </div>
                     </div>
                   </button>
                 </li>
