@@ -98,3 +98,77 @@ export const getTodaysPatientsWithCards = async (): Promise<PatientWithCards[]> 
   }
   return result
 }
+
+export const getPoolCards = async (): Promise<PoolCard[]> => {
+  const { data: campaigns } = await supabase
+    .from('campaigns')
+    .select('id, name')
+    .eq('type', 'patient')
+    .eq('status', 'active')
+  if (!campaigns || campaigns.length === 0) return []
+
+  const campaignIds = (campaigns as Array<{ id: string; name: string }>).map((c) => c.id)
+  const nameById = new Map(
+    (campaigns as Array<{ id: string; name: string }>).map((c) => [c.id, c.name])
+  )
+
+  const { data: cards } = await supabase
+    .from('referral_cards')
+    .select('code, campaign_id')
+    .in('campaign_id', campaignIds)
+    .eq('status', 'available')
+    .is('referrer_id', null)
+    .order('created_at', { ascending: true })
+
+  return (cards as Array<{ code: string; campaign_id: string }> || []).map((c) => ({
+    code: c.code,
+    campaignName: nameById.get(c.campaign_id) || '',
+  }))
+}
+
+export const assignCardsToPatient = async (
+  codes: string[],
+  patient: { uuid: string; name: string; phone: string | null }
+): Promise<void> => {
+  for (const code of codes) {
+    // 1. Verify card exists and is available
+    const { data: card, error: cardError } = await supabase
+      .from('referral_cards')
+      .select('campaign_id, status')
+      .eq('code', code.toUpperCase())
+      .single()
+    if (cardError || !card) throw new Error(`Card ${code} not found`)
+    if ((card as { status: string }).status !== 'available')
+      throw new Error(`Card ${code} is ${(card as { status: string }).status}`)
+
+    // 2. Create patient referrer row
+    // NOTE: unique constraint (campaign_id, referrer_type, ref_id) will throw if
+    // this patient is already a referrer in the same campaign — same behaviour as desktop.
+    const { data: referrer, error: refError } = await supabase
+      .from('referrers')
+      .insert({
+        campaign_id: (card as { campaign_id: string }).campaign_id,
+        referrer_type: 'patient',
+        ref_id: patient.uuid,
+        name: patient.name,
+        phone: patient.phone,
+        address: null,
+        contact_person: null,
+        approved_at: new Date().toISOString(),
+      })
+      .select()
+      .single()
+    if (refError) throw refError
+
+    // 3. Flip card to assigned
+    const { error: updateError } = await supabase
+      .from('referral_cards')
+      .update({
+        referrer_id: (referrer as { id: string }).id,
+        status: 'assigned',
+        assigned_at: new Date().toISOString(),
+      })
+      .eq('code', code.toUpperCase())
+    if (updateError) throw updateError
+  }
+}
