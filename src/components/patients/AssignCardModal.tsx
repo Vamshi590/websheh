@@ -27,15 +27,33 @@ const AssignCardModal: React.FC<Props> = ({ isOpen, onClose, onAssigned, patient
   // Reset and load pool cards when modal opens
   useEffect(() => {
     if (!isOpen) return
+    let cancelled = false
     setCodes([])
+    setPool([])
     setCardQuery('')
     setCardDropOpen(false)
     setErr('')
     setLoadingPool(true)
     getPoolCards()
-      .then(setPool)
-      .catch((e: Error) => setErr(e.message || 'Failed to load cards'))
-      .finally(() => setLoadingPool(false))
+      .then((cards) => { if (!cancelled) setPool(cards) })
+      .catch((e: Error) => { if (!cancelled) setErr(e.message || 'Failed to load cards') })
+      .finally(() => { if (!cancelled) setLoadingPool(false) })
+    return () => { cancelled = true }
+  }, [isOpen])
+
+  // Close modal on Escape key
+  useEffect(() => {
+    if (!isOpen) return
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [isOpen, onClose])
+
+  // Lock body scroll while modal is open
+  useEffect(() => {
+    if (!isOpen) return
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = '' }
   }, [isOpen])
 
   // Close dropdown on outside click
@@ -75,7 +93,6 @@ const AssignCardModal: React.FC<Props> = ({ isOpen, onClose, onAssigned, patient
         phone: patient.phone,
       })
       onAssigned(codes)
-      onClose()
     } catch (e) {
       setErr((e as Error).message)
     } finally {
@@ -99,7 +116,7 @@ const AssignCardModal: React.FC<Props> = ({ isOpen, onClose, onAssigned, patient
               </svg>
               Assign Referral Card
             </h2>
-            <button onClick={onClose} className="text-gray-400 hover:text-gray-600 p-1">
+            <button onClick={onClose} aria-label="Close" className="text-gray-400 hover:text-gray-600 p-1">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
@@ -143,7 +160,7 @@ const AssignCardModal: React.FC<Props> = ({ isOpen, onClose, onAssigned, patient
                         <button
                           type="button"
                           onClick={() => toggleCode(c)}
-                          className="ml-0.5 text-indigo-400 hover:text-indigo-700"
+                          className="ml-0.5 p-1 text-indigo-400 hover:text-indigo-700"
                         >
                           &times;
                         </button>
@@ -169,6 +186,8 @@ const AssignCardModal: React.FC<Props> = ({ isOpen, onClose, onAssigned, patient
                       e.stopPropagation()
                       setCardDropOpen((o) => !o)
                     }}
+                    aria-expanded={cardDropOpen}
+                    aria-haspopup="listbox"
                     className={`w-full text-left border rounded-lg px-3 py-3 flex items-center justify-between transition-colors ${
                       codes.length > 0
                         ? 'border-indigo-300 bg-indigo-50'
