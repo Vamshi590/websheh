@@ -18,8 +18,8 @@ export interface PoolCard {
   campaignName: string
 }
 
-export const getTodaysPatientsWithCards = async (): Promise<PatientWithCards[]> => {
-  const today = format(toZonedTime(new Date(), 'Asia/Kolkata'), 'yyyy-MM-dd')
+export const getTodaysPatientsWithCards = async (date?: string): Promise<PatientWithCards[]> => {
+  const today = date ?? format(toZonedTime(new Date(), 'Asia/Kolkata'), 'yyyy-MM-dd')
 
   // 1. Today's prescriptions
   const { data: prescriptions, error: prescError } = await supabase

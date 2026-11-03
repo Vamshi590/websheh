@@ -104,9 +104,9 @@ const AssignCardModal: React.FC<Props> = ({ isOpen, onClose, onAssigned, patient
 
   return (
     // Overlay
-    <div className="fixed inset-0 bg-black/40 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div className="fixed inset-0 bg-black/40 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={onClose}>
       {/* Sheet / dialog */}
-      <div className="bg-white w-full sm:max-w-lg rounded-t-2xl sm:rounded-xl shadow-xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-white w-full sm:max-w-lg rounded-t-2xl sm:rounded-xl shadow-xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
         <div className="p-5">
           {/* Header */}
           <div className="flex justify-between items-center mb-5">
@@ -274,7 +274,7 @@ const AssignCardModal: React.FC<Props> = ({ isOpen, onClose, onAssigned, patient
             )}
 
             {/* Actions */}
-            <div className="flex gap-3 pt-1">
+            <div className="flex gap-3 pt-1" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
               <button
                 disabled={codes.length === 0 || busy}
                 onClick={submit}

@@ -4,11 +4,8 @@ import { useNavigate } from 'react-router-dom'
 import { toast, Toaster } from 'sonner'
 import { getTodaysPatientsWithCards, type PatientWithCards } from '../components/patients/api'
 import AssignCardModal from '../components/patients/AssignCardModal'
-import { format } from 'date-fns'
+import { format, parseISO } from 'date-fns'
 import { toZonedTime } from 'date-fns-tz'
-
-// --- Module-level constant (computed once per session, never needs to update) -
-const TODAY_IST = format(toZonedTime(new Date(), 'Asia/Kolkata'), 'dd MMM yyyy')
 
 // --- Status badge --------------------------------------------------------
 // Mirrors the badge logic in Prescriptions.tsx and the desktop PatientTable.
@@ -43,11 +40,14 @@ const Patients: React.FC = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [assignTarget, setAssignTarget] = useState<PatientWithCards | null>(null)
+  const [selectedDate, setSelectedDate] = useState<string>(
+    format(toZonedTime(new Date(), 'Asia/Kolkata'), 'yyyy-MM-dd')
+  )
 
   const loadPatients = () => {
     setLoading(true)
     setError(null)
-    getTodaysPatientsWithCards()
+    getTodaysPatientsWithCards(selectedDate)
       .then(setPatients)
       .catch((e: Error) => {
         setError(e.message || 'Failed to load patients')
@@ -56,10 +56,10 @@ const Patients: React.FC = () => {
       .finally(() => setLoading(false))
   }
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     loadPatients()
-  }, [])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedDate])
 
   const handleAssigned = (patientUuid: string, newCodes: string[]) => {
     setPatients((prev) =>
@@ -80,17 +80,26 @@ const Patients: React.FC = () => {
         <div className="max-w-2xl mx-auto px-4 py-4 flex items-center justify-between">
           <div>
             <h1 className="text-xl font-bold text-indigo-600">Patients</h1>
-            <p className="text-xs text-gray-400">Sri Harsha Eye Hospital · {TODAY_IST}</p>
+            <p className="text-xs text-gray-400">Sri Harsha Eye Hospital · {format(parseISO(selectedDate), 'dd MMM yyyy')}</p>
           </div>
-          <button
-            onClick={() => navigate('/dashboard')}
-            className="flex items-center gap-1.5 px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
-            </svg>
-            Back
-          </button>
+          <div className="flex items-center gap-2">
+            <input
+              type="date"
+              value={selectedDate}
+              max={format(toZonedTime(new Date(), 'Asia/Kolkata'), 'yyyy-MM-dd')}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              className="px-2 py-1.5 border border-gray-200 bg-white rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+            <button
+              onClick={() => navigate('/dashboard')}
+              className="flex items-center gap-1.5 px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
+              </svg>
+              Back
+            </button>
+          </div>
         </div>
       </header>
 
