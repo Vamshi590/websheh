@@ -124,6 +124,39 @@ const Dashboard: React.FC = () => {
                 </div>
               </Link>
             </div>
+            <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 hover:shadow-md cursor-pointer transition-all transform hover:-translate-y-1 hover:border-indigo-100">
+              <Link to="/patients" className="">
+                <div className="flex items-center mb-4">
+                  <div className="bg-indigo-100 p-3 rounded-full mr-4">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-8 w-8 text-indigo-600"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+                    </svg>
+                  </div>
+                  <h2 className="text-xl font-semibold text-gray-800">Patients</h2>
+                </div>
+                <p className="text-gray-600 mb-4">
+                  View today&apos;s patients and assign referral cards.
+                </p>
+                <div className="flex justify-end">
+                  <span className="text-indigo-600 font-medium flex items-center">
+                    Access
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4 ml-1"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
+                  </span>
+                </div>
+              </Link>
+            </div>
         </div>
       </main>
     </div>

@@ -3,6 +3,7 @@ import './App.css'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Prescription from './pages/Prescriptions'
+import Patients from './pages/Patients'
 import ProtectedRoute from './components/ProtectedRoute'
 
 function App() {
@@ -24,6 +25,14 @@ function App() {
           element={
             <ProtectedRoute>
               <Prescription />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/patients"
+          element={
+            <ProtectedRoute>
+              <Patients />
             </ProtectedRoute>
           }
         />
