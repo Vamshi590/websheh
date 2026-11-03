@@ -7,6 +7,9 @@ import AssignCardModal from '../components/patients/AssignCardModal'
 import { format } from 'date-fns'
 import { toZonedTime } from 'date-fns-tz'
 
+// --- Module-level constant (computed once per session, never needs to update) -
+const TODAY_IST = format(toZonedTime(new Date(), 'Asia/Kolkata'), 'dd MMM yyyy')
+
 // --- Status badge --------------------------------------------------------
 // Mirrors the badge logic in Prescriptions.tsx and the desktop PatientTable.
 
@@ -38,15 +41,24 @@ const Patients: React.FC = () => {
   const navigate = useNavigate()
   const [patients, setPatients] = useState<PatientWithCards[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [assignTarget, setAssignTarget] = useState<PatientWithCards | null>(null)
 
-  const today = format(toZonedTime(new Date(), 'Asia/Kolkata'), 'dd MMM yyyy')
-
-  useEffect(() => {
+  const loadPatients = () => {
+    setLoading(true)
+    setError(null)
     getTodaysPatientsWithCards()
       .then(setPatients)
-      .catch((e: Error) => toast.error(e.message || 'Failed to load patients'))
+      .catch((e: Error) => {
+        setError(e.message || 'Failed to load patients')
+        toast.error(e.message || 'Failed to load patients')
+      })
       .finally(() => setLoading(false))
+  }
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    loadPatients()
   }, [])
 
   const handleAssigned = (patientUuid: string, newCodes: string[]) => {
@@ -57,6 +69,7 @@ const Patients: React.FC = () => {
           : p
       )
     )
+    setAssignTarget(null)
     toast.success(`Card${newCodes.length > 1 ? 's' : ''} assigned successfully`)
   }
 
@@ -67,7 +80,7 @@ const Patients: React.FC = () => {
         <div className="max-w-2xl mx-auto px-4 py-4 flex items-center justify-between">
           <div>
             <h1 className="text-xl font-bold text-indigo-600">Patients</h1>
-            <p className="text-xs text-gray-400">Sri Harsha Eye Hospital · {today}</p>
+            <p className="text-xs text-gray-400">Sri Harsha Eye Hospital · {TODAY_IST}</p>
           </div>
           <button
             onClick={() => navigate('/dashboard')}
@@ -86,7 +99,19 @@ const Patients: React.FC = () => {
           <div className="text-center py-16 text-gray-400 text-sm">Loading today's patients...</div>
         )}
 
-        {!loading && patients.length === 0 && (
+        {!loading && error && (
+          <div className="text-center py-16 text-gray-400">
+            <p className="text-sm text-red-500 mb-3">{error}</p>
+            <button
+              onClick={loadPatients}
+              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors"
+            >
+              Retry
+            </button>
+          </div>
+        )}
+
+        {!loading && !error && patients.length === 0 && (
           <div className="text-center py-16 text-gray-400">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto text-gray-200 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -152,12 +177,9 @@ const Patients: React.FC = () => {
       {/* Assign Card Modal */}
       {assignTarget && (
         <AssignCardModal
-          isOpen={!!assignTarget}
+          isOpen={true}
           onClose={() => setAssignTarget(null)}
-          onAssigned={(newCodes) => {
-            handleAssigned(assignTarget.patientUuid, newCodes)
-            setAssignTarget(null)
-          }}
+          onAssigned={(newCodes) => handleAssigned(assignTarget.patientUuid, newCodes)}
           patient={{
             uuid: assignTarget.patientUuid,
             name: assignTarget.name,
@@ -167,7 +189,7 @@ const Patients: React.FC = () => {
         />
       )}
 
-      <Toaster />
+      <Toaster position="top-center" richColors />
     </div>
   )
 }
