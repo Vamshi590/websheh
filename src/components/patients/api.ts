@@ -46,23 +46,25 @@ export const getTodaysPatientsWithCards = async (): Promise<PatientWithCards[]> 
     .select('id, patientId, name, phone')
     .in('patientId', businessIds)
   if (patientError) throw patientError
+  if (!patientRows || patientRows.length === 0) return []
 
   type PatientRow = { id: string; patientId: string; name: string; phone: string | null }
   const patientByBusinessId = new Map<string, PatientRow>(
-    (patientRows as PatientRow[]).map((p) => [p.patientId, p])
+    patientRows.map((p) => [p.patientId, p])
   )
-  const uuids = (patientRows as PatientRow[]).map((p) => p.id)
+  const uuids = patientRows.map((p) => p.id)
 
   // 4. Fetch assigned cards for these patients via referrers join
   // Uses the same join pattern as the desktop app's campaigns:getCardsByPatients handler.
   const cardsByUuid = new Map<string, string[]>()
   if (uuids.length > 0) {
-    const { data: cardRows } = await supabase
+    const { data: cardRows, error: cardError } = await supabase
       .from('referral_cards')
       .select('code, referrers!inner(ref_id)')
       .in('referrers.ref_id', uuids)
       .eq('referrers.referrer_type', 'patient')
       .eq('status', 'assigned')
+    if (cardError) throw cardError
 
     for (const row of (cardRows || []) as unknown as Array<{
       code: string
