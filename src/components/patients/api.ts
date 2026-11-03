@@ -144,10 +144,11 @@ export const assignCardsToPatient = async (
     if (card.status !== 'available')
       throw new Error(`Card ${code} is ${card.status}`)
 
-    // 2. Create patient referrer row
-    // NOTE: unique constraint (campaign_id, referrer_type, ref_id) will throw if
-    // this patient is already a referrer in the same campaign — same behaviour as desktop.
-    const { data: referrer, error: refError } = await supabase
+    // 2. Create patient referrer row — if the patient is already a referrer in
+    //    this campaign (unique constraint on campaign_id + referrer_type + ref_id),
+    //    fetch and reuse the existing row instead of throwing.
+    let typedReferrer: { id: string }
+    const { data: insertedReferrer, error: refError } = await supabase
       .from('referrers')
       .insert({
         campaign_id: card.campaign_id,
@@ -161,9 +162,25 @@ export const assignCardsToPatient = async (
       })
       .select()
       .single()
-    if (refError) throw refError
-    if (!referrer) throw new Error(`Failed to create referrer row for card ${code}`)
-    const typedReferrer = referrer as { id: string }
+    if (refError) {
+      // 23505 = unique_violation — patient already a referrer in this campaign
+      if ((refError as { code?: string }).code === '23505') {
+        const { data: existing, error: fetchErr } = await supabase
+          .from('referrers')
+          .select('id')
+          .eq('campaign_id', card.campaign_id)
+          .eq('referrer_type', 'patient')
+          .eq('ref_id', patient.uuid)
+          .single()
+        if (fetchErr || !existing) throw fetchErr || new Error(`Failed to fetch existing referrer for card ${code}`)
+        typedReferrer = existing as { id: string }
+      } else {
+        throw refError
+      }
+    } else {
+      if (!insertedReferrer) throw new Error(`Failed to create referrer row for card ${code}`)
+      typedReferrer = insertedReferrer as { id: string }
+    }
 
     // 3. Flip card to assigned
     const { error: updateError } = await supabase
