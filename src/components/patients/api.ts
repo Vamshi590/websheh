@@ -100,25 +100,26 @@ export const getTodaysPatientsWithCards = async (): Promise<PatientWithCards[]> 
 }
 
 export const getPoolCards = async (): Promise<PoolCard[]> => {
-  const { data: campaigns } = await supabase
+  const { data: campaigns, error: campaignError } = await supabase
     .from('campaigns')
     .select('id, name')
     .eq('type', 'patient')
     .eq('status', 'active')
+  if (campaignError) throw campaignError
   if (!campaigns || campaigns.length === 0) return []
 
-  const campaignIds = (campaigns as Array<{ id: string; name: string }>).map((c) => c.id)
-  const nameById = new Map(
-    (campaigns as Array<{ id: string; name: string }>).map((c) => [c.id, c.name])
-  )
+  const typedCampaigns = campaigns as Array<{ id: string; name: string }>
+  const campaignIds = typedCampaigns.map((c) => c.id)
+  const nameById = new Map(typedCampaigns.map((c) => [c.id, c.name]))
 
-  const { data: cards } = await supabase
+  const { data: cards, error: cardsError } = await supabase
     .from('referral_cards')
     .select('code, campaign_id')
     .in('campaign_id', campaignIds)
     .eq('status', 'available')
     .is('referrer_id', null)
     .order('created_at', { ascending: true })
+  if (cardsError) throw cardsError
 
   return (cards as Array<{ code: string; campaign_id: string }> || []).map((c) => ({
     code: c.code,
@@ -130,16 +131,18 @@ export const assignCardsToPatient = async (
   codes: string[],
   patient: { uuid: string; name: string; phone: string | null }
 ): Promise<void> => {
+  const now = new Date().toISOString()
   for (const code of codes) {
     // 1. Verify card exists and is available
-    const { data: card, error: cardError } = await supabase
+    const { data: cardRaw, error: cardError } = await supabase
       .from('referral_cards')
       .select('campaign_id, status')
       .eq('code', code.toUpperCase())
       .single()
-    if (cardError || !card) throw new Error(`Card ${code} not found`)
-    if ((card as { status: string }).status !== 'available')
-      throw new Error(`Card ${code} is ${(card as { status: string }).status}`)
+    if (cardError || !cardRaw) throw new Error(`Card ${code} not found`)
+    const card = cardRaw as { campaign_id: string; status: string }
+    if (card.status !== 'available')
+      throw new Error(`Card ${code} is ${card.status}`)
 
     // 2. Create patient referrer row
     // NOTE: unique constraint (campaign_id, referrer_type, ref_id) will throw if
@@ -147,26 +150,28 @@ export const assignCardsToPatient = async (
     const { data: referrer, error: refError } = await supabase
       .from('referrers')
       .insert({
-        campaign_id: (card as { campaign_id: string }).campaign_id,
+        campaign_id: card.campaign_id,
         referrer_type: 'patient',
         ref_id: patient.uuid,
         name: patient.name,
         phone: patient.phone,
         address: null,
         contact_person: null,
-        approved_at: new Date().toISOString(),
+        approved_at: now,
       })
       .select()
       .single()
     if (refError) throw refError
+    if (!referrer) throw new Error(`Failed to create referrer row for card ${code}`)
+    const typedReferrer = referrer as { id: string }
 
     // 3. Flip card to assigned
     const { error: updateError } = await supabase
       .from('referral_cards')
       .update({
-        referrer_id: (referrer as { id: string }).id,
+        referrer_id: typedReferrer.id,
         status: 'assigned',
-        assigned_at: new Date().toISOString(),
+        assigned_at: now,
       })
       .eq('code', code.toUpperCase())
     if (updateError) throw updateError
